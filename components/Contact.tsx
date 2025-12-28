@@ -20,7 +20,7 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
     setReferenceCode(generatedCode);
 
     try {
-      // Direct Database Insertion via Supabase Client
+      // 1. Direct Database Insertion
       const { error } = await supabase
         .from('leads')
         .insert([{ 
@@ -29,18 +29,35 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
           type: 'CONTACT_FORM', 
           message: formData.message, 
           reference_code: generatedCode,
-          budget: 'N/A' // Default for general contact
+          budget: 'Contact Form' 
         }]);
 
       if (error) throw error;
 
+      // 2. Trigger Backend Notification
+      try {
+        await fetch('/api/hire/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            budget: 'General Inquiry',
+            message: formData.message,
+            referenceCode: generatedCode,
+            summary: `A general contact form submission from ${formData.name}.`
+          })
+        });
+      } catch (notifyErr) {
+        console.warn("Backend notification failed, but lead was saved:", notifyErr);
+      }
+
       setStatus('success');
       setFormData({ name: '', email: '', subject: 'General Inquiry', message: '' });
       
-      // Automatic redirect after a short delay for better UX
       setTimeout(() => {
         handleWhatsAppRedirect(generatedCode);
-      }, 2000);
+      }, 2500);
       
     } catch (err: any) {
       console.error("Supabase Contact Error:", err);
@@ -79,15 +96,14 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Ref Token</p>
                     <p className="text-2xl font-black text-indigo-600 tracking-tight">{referenceCode}</p>
                   </div>
-                  <p className="text-gray-500 mb-8 text-sm">Redirecting you to WhatsApp to finalize details...</p>
+                  <p className="text-gray-500 mb-8 text-sm">Redirecting to WhatsApp to finalize details...</p>
                   <button 
                     onClick={() => handleWhatsAppRedirect(referenceCode)}
                     className="clay-button-primary w-full py-4 font-black flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform"
                   >
                     Finish on WhatsApp
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                   </button>
-                  <button onClick={() => setStatus('idle')} className="mt-4 text-xs font-bold text-indigo-400 uppercase hover:text-indigo-600">Send another message</button>
+                  <button onClick={() => setStatus('idle')} className="mt-4 text-xs font-bold text-indigo-400 uppercase">Send another message</button>
                 </div>
               ) : (
                 <form className="space-y-6" onSubmit={handleSubmit}>
@@ -107,8 +123,8 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
                   </div>
                   
                   {status === 'error' && (
-                    <div className="p-4 clay-card-inset bg-red-50 text-red-500 text-xs font-bold rounded-2xl animate-fadeIn">
-                      Synchronization failed. Please check your connection and try again.
+                    <div className="p-4 clay-card-inset bg-red-50 text-red-500 text-xs font-bold rounded-2xl animate-fadeIn text-center">
+                      Error syncing to cloud. Please try again.
                     </div>
                   )}
 
@@ -117,17 +133,8 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
                     disabled={status === 'submitting'}
                     className={`clay-button-primary w-full py-5 font-black text-lg transform transition-all flex items-center justify-center gap-3 ${status === 'submitting' ? 'opacity-70 scale-95' : 'hover:scale-[1.02]'}`}
                   >
-                    {status === 'submitting' ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Syncing to Cloud...
-                      </>
-                    ) : "Send to Dashboard"}
+                    {status === 'submitting' ? "Syncing..." : "Send to Dashboard"}
                   </button>
-                  
-                  <p className="text-center text-[10px] font-black text-gray-400 uppercase tracking-widest mt-4">
-                    Inquiries are processed via Supabase & WhatsApp
-                  </p>
                 </form>
               )}
             </div>

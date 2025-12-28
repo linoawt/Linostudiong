@@ -38,9 +38,9 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
         Return JSON format.
       `;
 
-      // Using gemini-flash-lite-latest for low-latency response
+      // Optimized for quality and speed with gemini-3-flash-preview
       const response = await ai.models.generateContent({
-        model: "gemini-flash-lite-latest",
+        model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -59,7 +59,6 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
       const data = JSON.parse(response.text || '{}');
       
       if (data.referenceCode) {
-        // Step 1: Sync to Supabase Database
         const { error: dbError } = await supabase
           .from('leads')
           .insert([{ 
@@ -74,7 +73,6 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
 
         if (dbError) throw dbError;
 
-        // Step 2: Notify Admin via Node.js/Nodemailer Backend
         try {
           await fetch('/api/hire/notify', {
             method: 'POST',
@@ -89,7 +87,7 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
             })
           });
         } catch (mailErr) {
-          console.warn("Notification system delayed, but lead saved:", mailErr);
+          console.warn("Mail notification system offline:", mailErr);
         }
 
         setResultData({ referenceCode: data.referenceCode, emailFormatted: data.emailFormatted });
@@ -98,14 +96,14 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
         throw new Error("Invalid AI Response");
       }
     } catch (error) {
-      console.error("Studio Lead Sync Error:", error);
+      console.error("Lead Sync Failure:", error);
       setStatus('error');
     }
   };
 
   const handleWhatsAppRedirect = () => {
     if (!resultData) return;
-    const msg = `Hello Lino Studio! Ref: ${resultData.referenceCode}. I'm interested in the ${formData.budget} plan. Summary: ${resultData.emailFormatted}`;
+    const msg = `Hello Lino Studio! Ref: ${resultData.referenceCode}. Interested in: ${formData.budget}. Summary: ${resultData.emailFormatted}`;
     const cleanPhone = config.contactPhone.replace(/\D/g, '');
     const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
@@ -114,84 +112,54 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 overflow-y-auto bg-indigo-900/30 backdrop-blur-md animate-fadeIn">
-      <div className="clay-card w-full max-w-lg p-8 md:p-12 relative animate-scaleIn bg-[#F0F4F8] text-gray-900">
-        <button 
-          onClick={onClose} 
-          className="absolute top-6 right-6 w-10 h-10 clay-button flex items-center justify-center text-gray-400 hover:text-indigo-600 transition-colors"
-        >
+      <div className="clay-card w-full max-w-lg p-10 relative animate-scaleIn bg-[#F0F4F8] text-gray-900">
+        <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 clay-button flex items-center justify-center text-gray-400 hover:text-indigo-600 transition-colors">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
 
         {status !== 'success' ? (
           <>
             <div className="text-center mb-10">
-              <div className="w-16 h-16 clay-card-inset mx-auto flex items-center justify-center text-3xl mb-4 bg-white/50">💼</div>
-              <h2 className="text-3xl font-black mb-2">Hire <span className="text-indigo-600">The Studio</span></h2>
-              <p className="text-gray-500 text-sm font-medium">Your request will be prioritized via our Cloud CRM.</p>
-              {status === 'submitting' && (
-                <div className="mt-4 flex items-center justify-center gap-2 text-indigo-500 font-bold text-[10px] uppercase tracking-tighter">
-                   <svg className="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1a1 1 0 112 0v1a1 1 0 11-2 0zM13.243 15.657l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 01-1.414 1.414zM16 10a1 1 0 112 0 1 1 0 01-2 0z" /></svg>
-                   Low-latency AI Engine Active
-                </div>
-              )}
+              <div className="w-16 h-16 clay-card-inset mx-auto flex items-center justify-center text-3xl mb-4 bg-white/50">⚡</div>
+              <h2 className="text-3xl font-black mb-2 tracking-tight">Hire <span className="text-indigo-600">Studio</span></h2>
+              <p className="text-gray-500 text-sm font-medium">Synced with Gemini-3 & Supabase</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Full Name</label>
-                <input required type="text" className="w-full clay-card-inset px-6 py-4 outline-none border-none bg-white/50 font-bold" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Client Identity</label>
+                <input required type="text" placeholder="Full Name" className="w-full clay-card-inset px-6 py-4 outline-none border-none bg-white/50 font-bold" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Direct Email</label>
-                <input required type="email" className="w-full clay-card-inset px-6 py-4 outline-none border-none bg-white/50 font-bold" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-              </div>
+              <input required type="email" placeholder="Email Address" className="w-full clay-card-inset px-6 py-4 outline-none border-none bg-white/50 font-bold" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+              
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Budget Tier</label>
-                  <select className="w-full clay-card-inset px-6 py-4 outline-none border-none bg-white/50 font-black text-indigo-600 appearance-none" value={formData.budget} onChange={e => setFormData({...formData, budget: e.target.value})}>
-                    <option>Starter</option>
-                    <option>Professional</option>
-                    <option>Premium</option>
-                  </select>
+                <select className="w-full clay-card-inset px-6 py-4 outline-none border-none bg-white/50 font-black text-indigo-600" value={formData.budget} onChange={e => setFormData({...formData, budget: e.target.value})}>
+                  <option>Starter</option>
+                  <option>Professional</option>
+                  <option>Premium</option>
+                </select>
+                <div className="flex items-center justify-center text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                  Auto-Summarizing...
                 </div>
-                <div className="flex items-end">
-                   <p className="text-[9px] text-gray-400 italic mb-2">Supabase Sync Enabled.</p>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Project Scope</label>
-                <textarea required rows={3} className="w-full clay-card-inset px-6 py-4 outline-none border-none bg-white/50 resize-none font-medium text-sm" placeholder="Tell us about your brand goals..." value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}></textarea>
               </div>
               
-              <button 
-                type="submit" 
-                disabled={status === 'submitting'} 
-                className={`clay-button-primary w-full py-5 font-black text-lg flex items-center justify-center gap-3 transition-all ${status === 'submitting' ? 'opacity-70 scale-95' : 'hover:scale-[1.02]'}`}
-              >
-                {status === 'submitting' ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Syncing to Cloud...
-                  </>
-                ) : "Request Studio Slot"}
+              <textarea required rows={3} placeholder="Tell us about your project..." className="w-full clay-card-inset px-6 py-4 outline-none border-none bg-white/50 font-medium text-sm" value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}></textarea>
+              
+              <button disabled={status === 'submitting'} className="clay-button-primary w-full py-5 font-black text-lg flex items-center justify-center gap-3 active:scale-95 transition-transform">
+                {status === 'submitting' ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Initiate Studio Slot'}
               </button>
-              
-              {status === 'error' && <p className="text-center text-red-500 text-xs font-bold animate-fadeIn">Studio Sync Failure. Please retry.</p>}
             </form>
           </>
         ) : (
           <div className="text-center py-6 animate-scaleIn">
             <div className="w-24 h-24 clay-card-inset mx-auto flex items-center justify-center text-5xl mb-8 text-green-500 bg-white/50">✨</div>
-            <h2 className="text-3xl font-black mb-4">Request <span className="text-indigo-600">Synced</span></h2>
+            <h2 className="text-3xl font-black mb-4 tracking-tighter">Inquiry <span className="text-indigo-600">Live</span></h2>
             <div className="clay-card-inset p-6 bg-white/40 mb-8 border-2 border-green-100">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Cloud Reference Token</p>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Reference Token</p>
               <p className="text-4xl font-black text-indigo-600 tracking-tighter">{resultData?.referenceCode}</p>
             </div>
-            <p className="text-gray-600 mb-8 px-4 leading-relaxed font-medium">
-              Your inquiry is safely stored in our Supabase instance and a notification has been sent to the studio admin.
-            </p>
-            <button onClick={handleWhatsAppRedirect} className="clay-button-primary w-full py-5 font-black text-lg flex items-center justify-center gap-3 shadow-xl hover:shadow-indigo-200">
-              Complete on WhatsApp
+            <button onClick={handleWhatsAppRedirect} className="clay-button-primary w-full py-5 font-black text-lg flex items-center justify-center gap-3">
+              Proceed to WhatsApp
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
             </button>
           </div>

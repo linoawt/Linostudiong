@@ -9,21 +9,16 @@ const MOCK_PROJECTS: Project[] = [
     title: 'EcoBrand Identity',
     category: 'Graphic Design',
     thumbnail: 'https://images.unsplash.com/photo-1586717791821-3f44a563cc4c?auto=format&fit=crop&q=80&w=800',
-    description: 'A sustainable brand identity system for a renewable energy startup.'
+    description: 'A sustainable brand identity system for a renewable energy startup.',
+    projectUrl: 'https://behance.net'
   },
   {
     id: 'mock-2',
     title: 'Fintech Dashboard',
     category: 'Web Development',
     thumbnail: 'https://images.unsplash.com/photo-1551288049-bbbda546697c?auto=format&fit=crop&q=80&w=800',
-    description: 'A high-performance React dashboard for real-time financial tracking.'
-  },
-  {
-    id: 'mock-3',
-    title: 'Luxe Portfolio',
-    category: 'Web Development',
-    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800',
-    description: 'Minimalist interactive portfolio for a luxury architecture firm.'
+    description: 'A high-performance React dashboard for real-time financial tracking.',
+    projectUrl: 'https://github.com'
   }
 ];
 
@@ -43,7 +38,6 @@ const Portfolio: React.FC = () => {
 
         if (error) {
           console.warn("Supabase Fetch Error (Projects):", error.message || error);
-          // Fallback to mock data if database table is missing or empty
           setItems(MOCK_PROJECTS);
         } else if (!data || data.length === 0) {
           setItems(MOCK_PROJECTS);
@@ -51,7 +45,7 @@ const Portfolio: React.FC = () => {
           setItems(data);
         }
       } catch (err: any) {
-        console.error("Critical error fetching projects:", err.message || err);
+        console.error("Critical error fetching projects:", err);
         setItems(MOCK_PROJECTS);
       } finally {
         setIsLoading(false);
@@ -76,7 +70,7 @@ const Portfolio: React.FC = () => {
               <button 
                 key={cat} 
                 onClick={() => setFilter(cat as any)} 
-                className={`px-6 py-2 rounded-full font-bold transition-all ${filter === cat ? 'clay-button-primary' : 'clay-button'}`}
+                className={`px-6 py-2 rounded-full font-bold transition-all ${filter === cat ? 'clay-button-primary' : 'clay-button hover:text-indigo-600'}`}
               >
                 {cat}
               </button>
@@ -84,49 +78,53 @@ const Portfolio: React.FC = () => {
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="clay-card overflow-hidden animate-pulse">
-                <div className="aspect-[4/3] m-4 rounded-[1.5rem] bg-gray-200 shadow-inner"></div>
-                <div className="px-8 pb-8 pt-2 space-y-3">
-                  <div className="h-3 w-20 bg-gray-200 rounded"></div>
-                  <div className="h-6 w-48 bg-gray-200 rounded"></div>
-                  <div className="h-4 w-full bg-gray-100 rounded"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {filteredProjects.map((project) => (
-              <div key={project.id} className="clay-card overflow-hidden group hover:-translate-y-1 transition-transform duration-500">
-                <div className="relative aspect-[4/3] overflow-hidden m-4 rounded-[1.5rem] shadow-inner">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {filteredProjects.map((project) => {
+            const link = project.project_url || project.projectUrl || '#contact';
+            const isExternal = link.startsWith('http');
+            const thumbUrl = project.thumbnail && project.thumbnail.trim() !== '' 
+              ? project.thumbnail 
+              : `https://placehold.co/800x600?text=${encodeURIComponent(project.title)}+Preview`;
+            
+            return (
+              <div key={project.id} className="clay-card overflow-hidden group hover:-translate-y-2 transition-all duration-500">
+                <div className="relative aspect-[4/3] overflow-hidden m-4 rounded-[1.5rem] shadow-inner bg-gray-100">
                   <img 
-                    src={project.thumbnail || "https://picsum.photos/800/600?grayscale"} 
+                    src={thumbUrl} 
                     alt={project.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
+                    loading="lazy"
+                    onError={(e) => { 
+                      const target = e.target as HTMLImageElement;
+                      if (target.src !== 'https://placehold.co/800x600?text=Image+Unavailable') {
+                        target.src = 'https://placehold.co/800x600?text=Image+Unavailable';
+                      }
+                    }}
                   />
-                  <div className="absolute inset-0 bg-indigo-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button className="clay-button-primary px-6 py-2 font-bold transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                      View Project
-                    </button>
+                  <div className="absolute inset-0 bg-indigo-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[3px]">
+                    <a 
+                      href={link} 
+                      target={isExternal ? "_blank" : "_self"}
+                      rel="noopener noreferrer"
+                      className="clay-button-primary px-8 py-3 font-black text-sm transform translate-y-6 group-hover:translate-y-0 transition-all duration-500 flex items-center gap-2"
+                    >
+                      {isExternal ? 'Visit Site' : 'Inquire Now'}
+                      {isExternal && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>}
+                    </a>
                   </div>
                 </div>
                 <div className="px-8 pb-8 pt-2">
-                  <span className="text-indigo-600 text-xs font-bold uppercase tracking-widest">{project.category}</span>
-                  <h3 className="text-2xl font-bold mt-1">{project.title}</h3>
-                  <p className="text-gray-500 text-sm mt-2">{project.description}</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-indigo-600 text-[10px] font-black uppercase tracking-widest">{project.category}</span>
+                    {isExternal && <span className="bg-green-100 text-green-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">Live</span>}
+                  </div>
+                  <h3 className="text-2xl font-black mt-1 group-hover:text-indigo-600 transition-colors">{project.title}</h3>
+                  <p className="text-gray-500 text-sm mt-3 leading-relaxed">{project.description}</p>
                 </div>
               </div>
-            ))}
-            {filteredProjects.length === 0 && (
-              <div className="col-span-full py-20 text-center">
-                <p className="text-gray-400 font-bold italic">No projects found in this category.</p>
-              </div>
-            )}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </div>
     </section>
   );

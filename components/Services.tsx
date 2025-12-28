@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Service } from '../types';
 import { supabase } from '../supabase';
@@ -37,6 +36,7 @@ const MOCK_SERVICES: Service[] = [
 const Services: React.FC = () => {
   const [items, setItems] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -66,6 +66,10 @@ const Services: React.FC = () => {
     fetchServices();
   }, []);
 
+  const toggleExpand = (id: string) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
+
   return (
     <section id="services" className="py-24 px-6 bg-white/30">
       <div className="max-w-7xl mx-auto">
@@ -88,23 +92,42 @@ const Services: React.FC = () => {
               </div>
             ))
           ) : (
-            items.map((service) => (
-              <div key={service.id} className="clay-card p-10 group hover:-translate-y-2 transition-transform duration-300">
-                <div className="w-16 h-16 clay-card-inset flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">
-                  {service.icon}
+            items.map((service) => {
+              const isExpanded = expandedId === service.id;
+              return (
+                <div key={service.id} className={`clay-card p-10 group transition-all duration-500 overflow-hidden flex flex-col ${isExpanded ? 'ring-4 ring-indigo-100 bg-white/60' : 'hover:-translate-y-2'}`}>
+                  <div className="w-16 h-16 clay-card-inset flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">
+                    {service.icon}
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4">{service.title}</h3>
+                  <p className="text-gray-600 mb-6 text-sm flex-grow">{service.description}</p>
+                  
+                  <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-96 opacity-100 mb-8' : 'max-h-0 opacity-0'}`}>
+                    <div className="clay-card-inset p-6 bg-indigo-50/30">
+                      <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4">What's Included</h4>
+                      <ul className="space-y-3">
+                        {service.items && Array.isArray(service.items) && service.items.map((item, idx) => (
+                          <li key={idx} className="flex items-center gap-3 text-gray-700 font-bold text-xs">
+                            <span className="w-2 h-2 bg-indigo-600 rounded-full shadow-[0_0_8px_rgba(79,70,229,0.5)]"></span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => toggleExpand(service.id)}
+                    className={`clay-button w-full py-3 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${isExpanded ? 'text-indigo-600 bg-white' : 'text-gray-400 hover:text-indigo-500'}`}
+                  >
+                    {isExpanded ? 'Show Less' : 'View Details'}
+                    <svg className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
                 </div>
-                <h3 className="text-2xl font-bold mb-4">{service.title}</h3>
-                <p className="text-gray-600 mb-6 text-sm">{service.description}</p>
-                <ul className="space-y-2">
-                  {service.items && Array.isArray(service.items) && service.items.map((item, idx) => (
-                    <li key={idx} className="flex items-center gap-2 text-gray-700 font-medium text-sm">
-                      <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

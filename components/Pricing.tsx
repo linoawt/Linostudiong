@@ -1,12 +1,12 @@
-
 import React from 'react';
 import { PricePlan } from '../types';
 
 interface PricingProps {
   plans: PricePlan[];
+  onStartProject: () => void;
 }
 
-const Pricing: React.FC<PricingProps> = ({ plans }) => {
+const Pricing: React.FC<PricingProps> = ({ plans, onStartProject }) => {
   return (
     <section id="pricing" className="py-24 px-6">
       <div className="max-w-7xl mx-auto">
@@ -27,7 +27,12 @@ const Pricing: React.FC<PricingProps> = ({ plans }) => {
                   </li>
                 ))}
               </ul>
-              <button className={`w-full py-4 font-black transition-all ${plan.highlighted ? 'clay-button-primary' : 'clay-button hover:text-indigo-600'}`}>Get Started</button>
+              <button 
+                onClick={onStartProject}
+                className={`w-full py-4 font-black transition-all ${plan.highlighted ? 'clay-button-primary' : 'clay-button hover:text-indigo-600'}`}
+              >
+                Get Started
+              </button>
             </div>
           ))}
         </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -24,6 +23,8 @@ const INITIAL_STATE: SiteConfig = {
   contactEmail: "linostudiong@gmail.com",
   contactPhone: "+234 907 096 2800",
   location: "Yenagoa, Bayelsa State, Nigeria",
+  instagramUrl: "#",
+  linkedInUrl: "#",
   theme: 'light',
   couponPrefix: "LINO-",
   seo: {
@@ -63,8 +64,6 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch Settings from Supabase with a timeout or safety check
-        // The "Failed to fetch" usually happens here if the URL is dead
         const { data: settings, error: settingsError } = await supabase
           .from('settings')
           .select('*')
@@ -85,6 +84,8 @@ const App: React.FC = () => {
             contactEmail: settings.contact_email || INITIAL_STATE.contactEmail,
             contactPhone: settings.contact_phone || INITIAL_STATE.contactPhone,
             location: settings.location || INITIAL_STATE.location,
+            instagramUrl: settings.instagram_url || INITIAL_STATE.instagramUrl,
+            linkedInUrl: settings.linkedin_url || INITIAL_STATE.linkedInUrl,
             theme: settings.theme || INITIAL_STATE.theme,
             couponPrefix: settings.coupon_prefix || INITIAL_STATE.couponPrefix,
             seo: settings.seo || INITIAL_STATE.seo,
@@ -95,7 +96,6 @@ const App: React.FC = () => {
           setConfig(mappedConfig);
         }
       } catch (err: any) {
-        // This catches the actual "Failed to fetch" network error
         console.warn("Network error during Supabase fetch. Falling back to offline defaults.");
       } finally {
         setIsLoading(false);
@@ -145,7 +145,7 @@ const App: React.FC = () => {
         <Skills items={config.skills} />
         <div id="about"><Process /></div>
         <Testimonials />
-        <Pricing plans={config.plans} />
+        <Pricing plans={config.plans} onStartProject={() => setIsHireModalOpen(true)} />
         <FAQ items={config.faqs} />
         <Contact config={config} />
       </main>

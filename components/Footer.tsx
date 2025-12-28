@@ -33,8 +33,8 @@ const Footer: React.FC<FooterProps> = ({ onAdminClick, config }) => {
             <div className="space-y-4">
               <h4 className="font-black text-gray-900 uppercase tracking-widest text-sm">Connect</h4>
               <ul className="space-y-2 text-gray-600">
-                <li><a href="#" className="hover:text-indigo-600 transition-colors">Instagram</a></li>
-                <li><a href="#" className="hover:text-indigo-600 transition-colors">LinkedIn</a></li>
+                <li><a href={config.instagramUrl} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">Instagram</a></li>
+                <li><a href={config.linkedInUrl} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">LinkedIn</a></li>
               </ul>
             </div>
           </div>
