@@ -12,29 +12,35 @@ Lino Studio NG is a premium, claymorphic portfolio built for high conversion. Th
 
 ## 🚀 Deployment Guide (Vercel)
 
-To host your studio at `linostudiong.vercel.app`:
-
 1.  **Push to GitHub**:
     Ensure all files (`index.html`, `index.tsx`, etc.) are in the root directory and pushed to your `main` branch.
 2.  **Vercel Configuration**:
     - Log in to [Vercel](https://vercel.com).
-    - Import your GitHub repository `Linostudiong`.
-    - Vercel will automatically detect the static project.
-    - Ensure your environment variables (like `API_KEY` for Gemini) are set in the Vercel Dashboard if required.
-3.  **Final Step**: Vercel will build and deploy your site. It will be live at: [https://linostudiong.vercel.app](https://linostudiong.vercel.app).
+    - Import your GitHub repository.
+    - Vercel will detect Vite and build automatically.
+3.  **Environment Variables**:
+    - Add `API_KEY` in Vercel Dashboard for Gemini AI features.
 
 ---
 
 ## 🛠️ Hybrid Architecture
 
-- **Frontend**: Hosted on **Vercel**. Handles the UI, Portfolio, and Gemini AI.
-- **Database**: **Supabase** handles real-time leads and site configuration.
-- **Notifications**: Form submissions fallback to WhatsApp/Supabase automatically. To enable email notifications via `server.js`, you may need to convert the server logic into Vercel Serverless Functions in the `/api` directory.
+- **Frontend**: Hosted on **Vercel**. React + Vite + Tailwind CSS.
+- **Database**: **Supabase** handles real-time leads, portfolio items, and settings.
+- **AI Integration**: **Gemini-3 Flash** auto-summarizes project inquiries.
 
 ---
 
-## 🔐 Admin Access
-The **Studio Command Center** can be accessed via the dashboard button in the footer. Ensure you have added your admin credentials to the Supabase Auth section.
+## 🔐 Admin Dashboard Access
+
+The Studio Command Center is now separated from the main portfolio for security and performance.
+
+**URL**: `https://linostudiong.vercel.app/admin`
+
+### Instructions:
+1. Navigate to the `/admin` path.
+2. Log in with your Supabase administrator credentials.
+3. Manage Portfolio items, track leads, and monitor system health.
 
 ---
-&copy; 2025 Lino Studio NG &bull; Syncing Design with Reality.
+&copy; 2025 Lino Studio NG & bull; Syncing Design with Reality.

@@ -58,9 +58,15 @@ const INITIAL_STATE: SiteConfig = {
 const App: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHireModalOpen, setIsHireModalOpen] = useState(false);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [config, setConfig] = useState<SiteConfig>(INITIAL_STATE);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const handleLocationChange = () => setCurrentPath(window.location.pathname);
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,7 +78,7 @@ const App: React.FC = () => {
           .maybeSingle();
 
         if (settingsError) {
-          console.warn("Supabase returned an error, using local defaults:", settingsError.message);
+          console.warn("Supabase settings fetch error:", settingsError.message);
         }
 
         if (settings) {
@@ -121,6 +127,12 @@ const App: React.FC = () => {
     setConfig(newConfig);
   };
 
+  const navigateTo = (path: string) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+    window.scrollTo(0, 0);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F0F4F8]">
@@ -129,6 +141,18 @@ const App: React.FC = () => {
           <p className="text-indigo-600 font-black text-xs uppercase tracking-widest animate-pulse">Initializing Studio...</p>
         </div>
       </div>
+    );
+  }
+
+  // Admin Route Handling
+  if (currentPath === '/admin') {
+    return (
+      <AdminDashboard 
+        isOpen={true} 
+        onClose={() => navigateTo('/')} 
+        config={config} 
+        onUpdateConfig={handleUpdateConfig} 
+      />
     );
   }
 
@@ -151,10 +175,9 @@ const App: React.FC = () => {
         <Contact config={config} />
       </main>
 
-      <Footer config={config} onAdminClick={() => setIsAdminOpen(true)} />
+      <Footer config={config} onAdminClick={() => navigateTo('/admin')} />
 
       <HireMeModal isOpen={isHireModalOpen} onClose={() => setIsHireModalOpen(false)} config={config} />
-      <AdminDashboard isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} config={config} onUpdateConfig={handleUpdateConfig} />
     </div>
   );
 };

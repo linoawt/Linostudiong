@@ -31,13 +31,14 @@ const Portfolio: React.FC = () => {
     const fetchProjects = async () => {
       try {
         setIsLoading(true);
+        // Using safe selection to handle potential missing columns
         const { data, error } = await supabase
           .from('projects')
           .select('*')
           .order('created_at', { ascending: false });
 
         if (error) {
-          console.warn("Supabase Fetch Error (Projects):", error.message || error);
+          console.warn("Supabase Fetch Error (Projects):", error.message);
           setItems(MOCK_PROJECTS);
         } else if (!data || data.length === 0) {
           setItems(MOCK_PROJECTS);
@@ -92,7 +93,8 @@ const Portfolio: React.FC = () => {
             ))
           ) : (
             filteredProjects.map((project) => {
-              const link = project.project_url || project.projectUrl || '#contact';
+              // Robust link check handling both possible column names
+              const link = project.project_url || (project as any).projectUrl || '#contact';
               const isExternal = link.startsWith('http');
               const thumbUrl = project.thumbnail && project.thumbnail.trim() !== '' 
                 ? project.thumbnail 
