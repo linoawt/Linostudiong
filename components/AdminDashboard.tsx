@@ -31,7 +31,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose, config
     description: '',
     project_url: '' 
   });
-  const [newService, setNewService] = useState({ title: '', icon: '⚡', description: '', items: '' });
   const [previewError, setPreviewError] = useState(false);
 
   useEffect(() => {
@@ -107,8 +106,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose, config
           <h2 className="text-2xl font-black mb-8">Studio Access</h2>
           {dbError && <div className="mb-6 p-4 clay-card-inset bg-red-50 text-red-500 text-xs font-bold">{dbError}</div>}
           <form onSubmit={handleLogin} className="space-y-4">
-            <input type="email" placeholder="Email" className="w-full clay-card-inset px-6 py-4 font-bold" value={email} onChange={e => setEmail(e.target.value)} />
-            <input type="password" placeholder="Password" className="w-full clay-card-inset px-6 py-4 font-bold" value={password} onChange={e => setPassword(e.target.value)} />
+            <input type="email" placeholder="Email" className="w-full clay-card-inset px-6 py-4 font-bold outline-none" value={email} onChange={e => setEmail(e.target.value)} />
+            <input type="password" placeholder="Password" className="w-full clay-card-inset px-6 py-4 font-bold outline-none" value={password} onChange={e => setPassword(e.target.value)} />
             <button className="clay-button-primary w-full py-4 font-black">Unlock</button>
             <button onClick={onClose} type="button" className="text-gray-400 text-xs font-bold mt-4">Close</button>
           </form>
@@ -143,14 +142,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose, config
         <div className="flex flex-grow overflow-hidden relative">
           <div className={`fixed md:relative inset-y-0 left-0 w-64 p-8 space-y-4 bg-white md:bg-white/20 z-[147] transition-all transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} flex flex-col`}>
             {tabs.map(tab => (
-              <button key={tab.id} onClick={() => { setActiveTab(tab.id as any); setIsSidebarOpen(false); }} className={`w-full text-left px-6 py-4 rounded-[2rem] font-black flex items-center gap-4 ${activeTab === tab.id ? 'clay-card text-indigo-600 bg-white' : 'clay-card-inset opacity-50'}`}>
+              <button key={tab.id} onClick={() => { setActiveTab(tab.id as any); setIsSidebarOpen(false); }} className={`w-full text-left px-6 py-4 rounded-[2rem] font-black flex items-center gap-4 transition-all ${activeTab === tab.id ? 'clay-card text-indigo-600 bg-white' : 'opacity-50 hover:opacity-100'}`}>
                 <span>{tab.icon}</span> <span>{tab.label}</span>
               </button>
             ))}
             <div className="mt-auto pt-6 border-t"><button onClick={handleLogout} className="w-full clay-button-primary bg-red-500 py-4 font-black">Sign Out</button></div>
           </div>
 
-          <div className="flex-grow p-6 md:p-12 overflow-y-auto bg-white/5 w-full">
+          <div className="flex-grow p-6 md:p-12 overflow-y-auto bg-white/5 w-full custom-scrollbar">
             {activeTab === 'portfolio' && (
               <div className="space-y-12">
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -192,15 +191,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose, config
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
                   {projects.map(p => (
                     <div key={p.id} className="clay-card p-4 flex flex-col gap-3 group">
-                      <div className="aspect-video overflow-hidden rounded-xl clay-card-inset">
+                      <div className="aspect-video overflow-hidden rounded-xl clay-card-inset bg-gray-100">
                         <img 
-                          src={p.thumbnail || "https://placehold.co/600x400?text=No+Thumbnail"} 
+                          src={p.thumbnail || "https://placehold.co/600x400/f0f4f8/4f46e5?text=No+Thumbnail"} 
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
                           alt="" 
-                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Image+Missing'; }}
+                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/600x400/f0f4f8/e53e3e?text=Image+Missing'; }}
                         />
                       </div>
                       <div className="flex justify-between items-start">
@@ -219,21 +218,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose, config
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
                 <div className="clay-card p-10 text-center"><p className="text-5xl font-black text-indigo-600 mb-2">{leads.length}</p><p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Leads</p></div>
                 <div className="clay-card p-10 text-center"><p className="text-5xl font-black text-indigo-400 mb-2">{projects.length}</p><p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Work Items</p></div>
-                <div className="clay-card p-10 text-center"><p className="text-5xl font-black text-green-500 mb-2">Healthy</p><p className="text-[10px) font-black uppercase tracking-widest text-gray-400">System Status</p></div>
+                <div className="clay-card p-10 text-center"><p className="text-5xl font-black text-green-500 mb-2">Healthy</p><p className="text-[10px] font-black uppercase tracking-widest text-gray-400">System Status</p></div>
               </div>
             )}
             {activeTab === 'leads' && (
-              <div className="space-y-6">
+              <div className="space-y-6 pb-10">
                 {leads.map(l => (
-                  <div key={l.id} className="clay-card p-8 flex justify-between bg-white/60">
+                  <div key={l.id} className="clay-card p-8 flex flex-col sm:flex-row justify-between bg-white/60 gap-6">
                     <div className="flex-grow pr-4">
-                      <h4 className="font-black text-xl">{l.name}</h4>
+                      <div className="flex items-center gap-3 mb-1">
+                        <h4 className="font-black text-xl">{l.name}</h4>
+                        <span className="text-[9px] font-black bg-indigo-50 px-3 py-1 rounded-full uppercase text-indigo-600">{l.reference_code}</span>
+                      </div>
                       <p className="text-indigo-600 text-sm font-bold mb-4">{l.email}</p>
                       <div className="clay-card-inset p-4 bg-white/40 italic text-xs leading-relaxed">"{l.message}"</div>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="text-[9px] font-black bg-indigo-50 px-3 py-1 rounded-full uppercase text-indigo-600">{l.reference_code}</span>
-                      <p className="text-[10px] text-gray-400 mt-2">{new Date(l.created_at || '').toLocaleDateString()}</p>
+                      <p className="text-[10px] text-gray-400 mb-2">{new Date(l.created_at || '').toLocaleDateString()}</p>
+                      <a href={`mailto:${l.email}`} className="clay-button px-4 py-2 text-xs font-black text-indigo-600 hover:bg-white transition-all">Quick Reply</a>
                     </div>
                   </div>
                 ))}

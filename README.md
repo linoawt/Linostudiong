@@ -1,8 +1,8 @@
 
 # 🌐 Lino Studio NG — Studio Infrastructure
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-4F46E5?style=for-the-badge)](https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/)
-[![Deployment](https://img.shields.io/badge/Status-Live_on_GitHub_Pages-3ECF8E?style=for-the-badge)](https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-4F46E5?style=for-the-badge)](https://linoawt.github.io/Linostudiong/)
+[![Deployment](https://img.shields.io/badge/Status-Live_on_GitHub_Pages-3ECF8E?style=for-the-badge)](https://linoawt.github.io/Linostudiong/)
 
 > **Designing Visual Identity. Building Digital Experiences.**
 
@@ -14,7 +14,7 @@ Lino Studio NG is a premium, claymorphic portfolio built for high conversion. Th
 
 Since you have installed the `gh-pages` package, follow these steps to sync your project to the web:
 
-1.  **Configure URL**: Open `package.json` and replace `YOUR_USERNAME` and `YOUR_REPO_NAME` in the `homepage` field with your actual GitHub details.
+1.  **Configure URL**: Your `package.json` is already set to `https://linoawt.github.io/Linostudiong/`.
 2.  **Sync & Deploy**: Run the following command in your terminal:
     ```bash
     npm run deploy
