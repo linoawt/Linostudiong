@@ -1,23 +1,72 @@
 
 # 🌐 Lino Studio NG — Studio Infrastructure
 
-This is the core repository for **Lino Studio NG**, a premium portfolio built with React, TypeScript, Supabase, and Gemini AI.
+[![GitHub Pages](https://img.shields.io/badge/Deployment-GitHub_Pages-4F46E5?style=for-the-badge&logo=github)](https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/)
+[![Database](https://img.shields.io/badge/Backend-Supabase-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com)
+[![AI](https://img.shields.io/badge/AI-Gemini_3-blue?style=for-the-badge&logo=google-gemini)](https://ai.google.dev/)
 
-## 🔐 Admin Dashboard Access
+> **Designing Visual Identity. Building Digital Experiences.**
 
-The Admin Dashboard is protected by **Supabase Authentication**.
+Lino Studio NG is a premium, claymorphic portfolio built for high conversion. It leverages a modern tech stack to provide real-time lead generation and a sophisticated administrative suite.
 
-### To Create Your Admin Login:
-1. Log in to your [Supabase Dashboard](https://supabase.com/dashboard).
-2. Navigate to **Authentication** > **Users**.
-3. Click **Add User** > **Create new user**.
-4. Enter your preferred admin email and a strong password.
+---
+
+## 🚀 Live Deployment
+**View the live site here:** [https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/](https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/)
+
+*Note: Replace YOUR_USERNAME and YOUR_REPO_NAME with your actual GitHub details.*
+
+---
+
+## 🛠️ Tech Stack & Architecture
+
+- **Frontend:** React 19 (ES6 Modules), TypeScript, Tailwind CSS.
+- **UI Style:** Claymorphism (Soft shadows, rounded glassmorphism).
+- **Database:** Supabase (Real-time leads & site configuration).
+- **AI Engine:** Google Gemini 3 Flash (Automated lead summarization).
+- **Hosting:** 
+    - **Frontend:** GitHub Pages (Static).
+    - **Notifications:** Node.js / Express (Heroku/Render/Vercel).
+
+---
+
+## 📦 Deployment to GitHub Pages
+
+This project is optimized for GitHub Pages. Follow these steps:
+
+1. **Environment Variables:** 
+   Ensure your `process.env.API_KEY` (Gemini) is handled. If deploying purely as a static site, consider using a build tool like Vite or injecting variables via GitHub Actions.
+   
+2. **GitHub Actions Workflow:**
+   Create `.github/workflows/deploy.yml`:
+   ```yaml
+   name: Deploy to GitHub Pages
+   on:
+     push:
+       branches: [main]
+   jobs:
+     build-and-deploy:
+       runs-on: ubuntu-latest
+       steps:
+         - name: Checkout
+           uses: actions/checkout@v3
+         - name: Deploy
+           uses: JamesIves/github-pages-deploy-action@v4
+           with:
+             folder: . # The folder the action should deploy.
+             branch: gh-pages
+   ```
+
+3. **Settings:**
+   - Go to your Repository **Settings** > **Pages**.
+   - Set **Source** to "Deploy from a branch".
+   - Select `gh-pages` (after the action runs) or `main`.
 
 ---
 
 ## ☁️ Cloud Database Setup (Supabase)
 
-If the app shows "Table not found" warnings, run this script in your **Supabase SQL Editor**:
+Run this script in your **Supabase SQL Editor** to initialize the studio engine:
 
 ```sql
 -- 1. Infrastructure Extensions
@@ -67,7 +116,11 @@ CREATE TABLE public.settings (
     plans JSONB
 );
 
--- 5. Row Level Security
+-- Initialize Default Settings
+INSERT INTO public.settings (id, site_name, tagline) 
+VALUES (1, 'Lino Studio NG', 'Designing Identity. Building Reality.');
+
+-- 5. Security (RLS)
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
@@ -79,4 +132,11 @@ CREATE POLICY "Allow admin all access" ON public.leads FOR ALL TO authenticated 
 CREATE POLICY "Allow admin all access projects" ON public.projects FOR ALL TO authenticated USING (true);
 CREATE POLICY "Allow admin update settings" ON public.settings FOR UPDATE TO authenticated USING (true);
 ```
+
 ---
+
+## 🔐 Admin Access
+The Studio Command Center is available at the footer of the site. Access requires an account created in your **Supabase Auth** dashboard.
+
+---
+&copy; 2025 Lino Studio NG. All rights reserved.
