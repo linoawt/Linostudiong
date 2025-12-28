@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Project } from '../types';
-import { supabase } from '../supabase';
+import { Project } from '../types.ts';
+import { supabase } from '../supabase.ts';
 
 const MOCK_PROJECTS: Project[] = [
   {
@@ -48,7 +48,7 @@ const Portfolio: React.FC = () => {
         console.error("Critical error fetching projects:", err);
         setItems(MOCK_PROJECTS);
       } finally {
-        setIsLoading(false);
+        setTimeout(() => setIsLoading(false), 1000);
       }
     };
 
@@ -79,55 +79,62 @@ const Portfolio: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {filteredProjects.map((project) => {
-            const link = project.project_url || project.projectUrl || '#contact';
-            const isExternal = link.startsWith('http');
-            const thumbUrl = project.thumbnail && project.thumbnail.trim() !== '' 
-              ? project.thumbnail 
-              : `https://placehold.co/800x600/f0f4f8/4f46e5?text=${encodeURIComponent(project.title)}`;
-            
-            return (
-              <div key={project.id} className="clay-card overflow-hidden group hover:-translate-y-2 transition-all duration-500">
-                <div className="relative aspect-[4/3] overflow-hidden m-4 rounded-[1.5rem] shadow-inner bg-gray-200 animate-pulse-slow">
-                  <img 
-                    src={thumbUrl} 
-                    alt={project.title} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
-                    loading="lazy"
-                    onLoad={(e) => {
-                      (e.currentTarget.parentElement as HTMLElement).classList.remove('animate-pulse-slow', 'bg-gray-200');
-                    }}
-                    onError={(e) => { 
-                      const target = e.target as HTMLImageElement;
-                      if (!target.src.includes('Image+Unavailable')) {
-                        target.src = 'https://placehold.co/800x600/f0f4f8/e53e3e?text=Image+Unavailable';
-                        (target.parentElement as HTMLElement).classList.remove('animate-pulse-slow', 'bg-gray-200');
-                      }
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-indigo-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[3px]">
-                    <a 
-                      href={link} 
-                      target={isExternal ? "_blank" : "_self"}
-                      rel="noopener noreferrer"
-                      className="clay-button-primary px-8 py-3 font-black text-sm transform translate-y-6 group-hover:translate-y-0 transition-all duration-500 flex items-center gap-2"
-                    >
-                      {isExternal ? 'Visit Site' : 'Inquire Now'}
-                      {isExternal && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>}
-                    </a>
-                  </div>
-                </div>
-                <div className="px-8 pb-8 pt-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-indigo-600 text-[10px] font-black uppercase tracking-widest">{project.category}</span>
-                    {isExternal && <span className="bg-green-100 text-green-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">Live</span>}
-                  </div>
-                  <h3 className="text-2xl font-black mt-1 group-hover:text-indigo-600 transition-colors">{project.title}</h3>
-                  <p className="text-gray-500 text-sm mt-3 leading-relaxed line-clamp-2">{project.description}</p>
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="clay-card overflow-hidden">
+                <div className="m-4 aspect-[4/3] skeleton rounded-[1.5rem]"></div>
+                <div className="px-8 pb-8 space-y-3">
+                  <div className="h-3 w-20 skeleton rounded-full"></div>
+                  <div className="h-6 w-3/4 skeleton rounded-lg"></div>
+                  <div className="h-4 w-full skeleton rounded-lg"></div>
                 </div>
               </div>
-            );
-          })}
+            ))
+          ) : (
+            filteredProjects.map((project) => {
+              const link = project.project_url || project.projectUrl || '#contact';
+              const isExternal = link.startsWith('http');
+              const thumbUrl = project.thumbnail && project.thumbnail.trim() !== '' 
+                ? project.thumbnail 
+                : `https://placehold.co/800x600/f0f4f8/4f46e5?text=${encodeURIComponent(project.title)}`;
+              
+              return (
+                <div key={project.id} className="clay-card overflow-hidden group hover:-translate-y-2 transition-all duration-500">
+                  <div className="relative aspect-[4/3] overflow-hidden m-4 rounded-[1.5rem] shadow-inner bg-gray-200">
+                    <img 
+                      src={thumbUrl} 
+                      alt={project.title} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
+                      loading="lazy"
+                      onError={(e) => { 
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://placehold.co/800x600/f0f4f8/e53e3e?text=Image+Unavailable';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-indigo-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[3px]">
+                      <a 
+                        href={link} 
+                        target={isExternal ? "_blank" : "_self"}
+                        rel="noopener noreferrer"
+                        className="clay-button-primary px-8 py-3 font-black text-sm transform translate-y-6 group-hover:translate-y-0 transition-all duration-500 flex items-center gap-2"
+                      >
+                        {isExternal ? 'Visit Site' : 'Inquire Now'}
+                        {isExternal && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>}
+                      </a>
+                    </div>
+                  </div>
+                  <div className="px-8 pb-8 pt-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-indigo-600 text-[10px] font-black uppercase tracking-widest">{project.category}</span>
+                      {isExternal && <span className="bg-green-100 text-green-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">Live</span>}
+                    </div>
+                    <h3 className="text-2xl font-black mt-1 group-hover:text-indigo-600 transition-colors">{project.title}</h3>
+                    <p className="text-gray-500 text-sm mt-3 leading-relaxed line-clamp-2">{project.description}</p>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </section>

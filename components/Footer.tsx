@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { SiteConfig } from '../types';
+import { SiteConfig } from '../types.ts';
 
 interface FooterProps {
   onAdminClick: () => void;
@@ -8,7 +8,8 @@ interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = ({ onAdminClick, config }) => {
-  const [nameMain, ...nameRest] = config.siteName.split(' ');
+  const siteName = config.siteName || "Lino Studio NG";
+  const [nameMain, ...nameRest] = siteName.split(' ');
   
   return (
     <footer className="pt-20 pb-10 px-6">
@@ -48,7 +49,7 @@ const Footer: React.FC<FooterProps> = ({ onAdminClick, config }) => {
           </div>
         </div>
         <div className="pt-8 border-t border-indigo-100 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500 font-medium">
-          <p>© 2025 {config.siteName}. All rights reserved.</p>
+          <p>© 2025 {siteName}. All rights reserved.</p>
           <div className="flex gap-6"><a href="#" className="hover:text-indigo-600 transition-colors">Privacy</a><a href="#" className="hover:text-indigo-600 transition-colors">Terms</a></div>
         </div>
       </div>

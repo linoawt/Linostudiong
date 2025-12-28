@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { SiteConfig } from '../types';
+import { SiteConfig } from '../types.ts';
 
 interface HeroProps {
   config: SiteConfig;
@@ -8,7 +8,8 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ config, onStartProject }) => {
-  const headlineParts = config.heroHeadline.split('.');
+  const headline = config.heroHeadline || "Design That Speaks. Code That Works.";
+  const headlineParts = headline.split('.');
   
   return (
     <section id="home" className="pt-32 pb-20 px-6 min-h-screen flex items-center justify-center relative overflow-hidden">

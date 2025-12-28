@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { SiteConfig } from '../types';
-import { supabase } from '../supabase';
+import { SiteConfig } from '../types.ts';
+import { supabase } from '../supabase.ts';
 
 interface ContactProps {
   config: SiteConfig;
@@ -20,7 +20,6 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
     setReferenceCode(generatedCode);
 
     try {
-      // 1. Direct Database Insertion
       const { error } = await supabase
         .from('leads')
         .insert([{ 
@@ -34,7 +33,6 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
 
       if (error) throw error;
 
-      // 2. Trigger Backend Notification
       try {
         await fetch('/api/hire/notify', {
           method: 'POST',
@@ -49,7 +47,7 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
           })
         });
       } catch (notifyErr) {
-        console.warn("Backend notification failed, but lead was saved:", notifyErr);
+        console.warn("Notification engine skipped:", notifyErr);
       }
 
       setStatus('success');
@@ -60,13 +58,13 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
       }, 2500);
       
     } catch (err: any) {
-      console.error("Supabase Contact Error:", err);
+      console.error("Submission error:", err);
       setStatus('error');
     }
   };
 
   const handleWhatsAppRedirect = (code: string) => {
-    const msg = `Hello Lino Studio! Ref: ${code}. I just sent an inquiry through your website. Message: ${formData.message || 'Following up on my contact form submission.'}`;
+    const msg = `Hello Lino Studio! Ref: ${code}. I sent an inquiry via your site. Message: ${formData.message || 'Following up on my form.'}`;
     const cleanPhone = config.contactPhone.replace(/\D/g, '');
     const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
@@ -96,14 +94,13 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Ref Token</p>
                     <p className="text-2xl font-black text-indigo-600 tracking-tight">{referenceCode}</p>
                   </div>
-                  <p className="text-gray-500 mb-8 text-sm">Redirecting to WhatsApp to finalize details...</p>
+                  <p className="text-gray-500 mb-8 text-sm">Redirecting to WhatsApp...</p>
                   <button 
                     onClick={() => handleWhatsAppRedirect(referenceCode)}
-                    className="clay-button-primary w-full py-4 font-black flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform"
+                    className="clay-button-primary w-full py-4 font-black flex items-center justify-center gap-2"
                   >
                     Finish on WhatsApp
                   </button>
-                  <button onClick={() => setStatus('idle')} className="mt-4 text-xs font-bold text-indigo-400 uppercase">Send another message</button>
                 </div>
               ) : (
                 <form className="space-y-6" onSubmit={handleSubmit}>
@@ -123,7 +120,7 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
                   </div>
                   
                   {status === 'error' && (
-                    <div className="p-4 clay-card-inset bg-red-50 text-red-500 text-xs font-bold rounded-2xl animate-fadeIn text-center">
+                    <div className="p-4 clay-card-inset bg-red-50 text-red-500 text-xs font-bold rounded-2xl text-center">
                       Error syncing to cloud. Please try again.
                     </div>
                   )}

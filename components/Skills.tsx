@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Skill } from '../types';
+import { Skill } from '../types.ts';
 
 interface SkillsProps {
   items: Skill[];
@@ -25,7 +25,7 @@ const Skills: React.FC<SkillsProps> = ({ items }) => {
               {designSkills.map((skill) => (
                 <div key={skill.name}>
                   <div className="flex justify-between items-end mb-2"><span className="font-bold text-gray-800">{skill.name}</span><span className="text-indigo-600 font-black text-sm">{skill.level}%</span></div>
-                  <div className="h-4 w-full clay-progress-bg p-1 overflow-hidden"><div className="h-full bg-indigo-600 rounded-full" style={{ width: `${skill.level}%` }}></div></div>
+                  <div className="h-4 w-full clay-card-inset p-1 overflow-hidden rounded-full"><div className="h-full bg-indigo-600 rounded-full" style={{ width: `${skill.level}%` }}></div></div>
                 </div>
               ))}
             </div>
@@ -36,7 +36,7 @@ const Skills: React.FC<SkillsProps> = ({ items }) => {
               {devSkills.map((skill) => (
                 <div key={skill.name}>
                   <div className="flex justify-between items-end mb-2"><span className="font-bold text-gray-800">{skill.name}</span><span className="text-indigo-600 font-black text-sm">{skill.level}%</span></div>
-                  <div className="h-4 w-full clay-progress-bg p-1 overflow-hidden"><div className="h-full bg-indigo-400 rounded-full" style={{ width: `${skill.level}%` }}></div></div>
+                  <div className="h-4 w-full clay-card-inset p-1 overflow-hidden rounded-full"><div className="h-full bg-indigo-400 rounded-full" style={{ width: `${skill.level}%` }}></div></div>
                 </div>
               ))}
             </div>

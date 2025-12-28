@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { PricePlan } from '../types';
+import { PricePlan } from '../types.ts';
 
 interface PricingProps {
   plans: PricePlan[];

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { SiteConfig } from '../types';
+import { SiteConfig } from '../types.ts';
 
 interface HeaderProps {
   isScrolled: boolean;
@@ -25,7 +25,8 @@ const Header: React.FC<HeaderProps> = ({ isScrolled, onHireMeClick, config }) =>
     onHireMeClick();
   };
 
-  const [nameMain, ...nameRest] = config.siteName.split(' ');
+  const siteName = config.siteName || "Lino Studio NG";
+  const [nameMain, ...nameRest] = siteName.split(' ');
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 pt-4`}>
