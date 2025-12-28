@@ -14,6 +14,7 @@ import Footer from './components/Footer';
 import HireMeModal from './components/HireMeModal';
 import AdminDashboard from './components/AdminDashboard';
 import { SiteConfig } from './types';
+import { supabase } from './supabase';
 
 const INITIAL_STATE: SiteConfig = {
   siteName: "Lino Studio NG",
@@ -32,9 +33,23 @@ const INITIAL_STATE: SiteConfig = {
   },
   projects: [],
   services: [],
-  skills: [],
-  faqs: [],
-  plans: []
+  skills: [
+    { name: "Branding", level: 95, category: "Design" },
+    { name: "Logo Design", level: 90, category: "Design" },
+    { name: "UI/UX", level: 85, category: "Design" },
+    { name: "React/TS", level: 95, category: "Development" },
+    { name: "Node.js", level: 85, category: "Development" },
+    { name: "Supabase", level: 90, category: "Development" }
+  ],
+  faqs: [
+    { question: "What is your typical turnaround?", answer: "Usually 1-3 weeks depending on the complexity." },
+    { question: "Do you offer maintenance?", answer: "Yes, we have monthly support packages." }
+  ],
+  plans: [
+    { name: "Starter", price: "$499", features: ["Basic Website", "SEO Ready", "5 Pages"] },
+    { name: "Professional", price: "$999", features: ["Dynamic Web App", "Custom Branding", "CMS Access"], highlighted: true },
+    { name: "Premium", price: "$1999", features: ["Full Enterprise Solution", "Mobile App Support", "Priority 24/7"] }
+  ]
 };
 
 const App: React.FC = () => {
@@ -42,26 +57,48 @@ const App: React.FC = () => {
   const [isHireModalOpen, setIsHireModalOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [config, setConfig] = useState<SiteConfig>(INITIAL_STATE);
-  const [isBackendConnected, setIsBackendConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Sync with real Node.js Backend
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/config');
-        if (response.ok) {
-          const data = await response.json();
-          setConfig(prev => ({ ...prev, ...data }));
-          setIsBackendConnected(true);
-        } else {
-          // Fallback to local storage if server is down during development
-          const saved = localStorage.getItem('lino_studio_db');
-          if (saved) setConfig(JSON.parse(saved));
-        }
+        // 1. Fetch Settings
+        const { data: settings, error: settingsError } = await supabase
+          .from('settings')
+          .select('*')
+          .single();
+
+        if (settingsError) throw settingsError;
+
+        // 2. Map DB snake_case to camelCase types
+        const mappedConfig: SiteConfig = {
+          ...INITIAL_STATE,
+          siteName: settings.site_name || INITIAL_STATE.siteName,
+          tagline: settings.tagline || INITIAL_STATE.tagline,
+          // Fixed: Changed hero_headline to heroHeadline and hero_subtext to heroSubtext to match SiteConfig type
+          heroHeadline: settings.hero_headline || INITIAL_STATE.heroHeadline,
+          heroSubtext: settings.hero_subtext || INITIAL_STATE.heroSubtext,
+          contactEmail: settings.contact_email || INITIAL_STATE.contactEmail,
+          contactPhone: settings.contact_phone || INITIAL_STATE.contactPhone,
+          location: settings.location || INITIAL_STATE.location,
+          theme: settings.theme || INITIAL_STATE.theme,
+          couponPrefix: settings.coupon_prefix || INITIAL_STATE.couponPrefix,
+          seo: settings.seo || INITIAL_STATE.seo,
+          skills: settings.skills || INITIAL_STATE.skills,
+          faqs: settings.faqs || INITIAL_STATE.faqs,
+          plans: settings.plans || INITIAL_STATE.plans
+        };
+        
+        // 3. Fetch Services (Portfolio now handles its own)
+        const { data: servicesData } = await supabase.from('services').select('*').order('created_at', { ascending: true });
+        
+        if (servicesData) mappedConfig.services = servicesData;
+
+        setConfig(mappedConfig);
       } catch (err) {
-        console.warn("Backend not detected, running in standalone mode.");
-        const saved = localStorage.getItem('lino_studio_db');
-        if (saved) setConfig(JSON.parse(saved));
+        console.warn("Supabase Fetch Error, using local defaults:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -69,51 +106,44 @@ const App: React.FC = () => {
 
   useEffect(() => {
     document.title = config.seo.metaTitle;
-    if (config.theme === 'dark') document.documentElement.classList.add('dark-mode');
-    else document.documentElement.classList.remove('dark-mode');
-  }, [config]);
+    const isDark = config.theme === 'dark';
+    document.documentElement.classList.toggle('dark-mode', isDark);
+  }, [config.theme, config.seo.metaTitle]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleUpdateConfig = async (newConfig: SiteConfig) => {
+  const handleUpdateConfig = (newConfig: SiteConfig) => {
     setConfig(newConfig);
-    // Persist to Backend
-    try {
-      await fetch('/api/config/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newConfig)
-      });
-    } catch (err) {
-      localStorage.setItem('lino_studio_db', JSON.stringify(newConfig));
-    }
   };
 
-  return (
-    <div className={`transition-colors duration-500 ${config.theme === 'dark' ? 'bg-[#1a1a2e] text-white' : 'bg-[#F0F4F8] text-gray-900'}`}>
-      {/* Backend Connectivity Status (Admin only or Debug) */}
-      {!isBackendConnected && (
-        <div className="fixed bottom-4 left-4 z-[200] px-3 py-1 bg-yellow-400 text-black text-[10px] font-black rounded-full shadow-lg flex items-center gap-2">
-          <div className="w-2 h-2 bg-yellow-600 rounded-full animate-pulse"></div>
-          STANDALONE MODE (NO DB)
-        </div>
-      )}
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F0F4F8]">
+        <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
+  return (
+    <div className={`transition-colors duration-500 min-h-screen ${config.theme === 'dark' ? 'bg-[#1a1a2e] text-white' : 'bg-[#F0F4F8] text-gray-900'}`}>
       <Header isScrolled={isScrolled} config={config} onHireMeClick={() => setIsHireModalOpen(true)} />
       
-      <main>
+      <main className="relative">
+        <div className="blob top-20 left-10 opacity-20"></div>
+        <div className="blob bottom-40 right-10 opacity-10 bg-indigo-400"></div>
+        
         <Hero config={config} onStartProject={() => setIsHireModalOpen(true)} />
-        <Services items={config.services.length > 0 ? config.services : INITIAL_STATE.services} />
-        <Portfolio items={config.projects.length > 0 ? config.projects : INITIAL_STATE.projects} />
-        <Skills items={config.skills.length > 0 ? config.skills : INITIAL_STATE.skills} />
+        <Services items={config.services.length > 0 ? config.services : []} />
+        <Portfolio />
+        <Skills items={config.skills} />
         <div id="about"><Process /></div>
         <Testimonials />
-        <Pricing plans={config.plans.length > 0 ? config.plans : INITIAL_STATE.plans} />
-        <FAQ items={config.faqs.length > 0 ? config.faqs : INITIAL_STATE.faqs} />
+        <Pricing plans={config.plans} />
+        <FAQ items={config.faqs} />
         <Contact config={config} />
       </main>
 

@@ -71,7 +71,13 @@ export interface Lead {
   type: 'HIRE_ME' | 'CONTACT_FORM';
   budget?: string;
   message: string;
-  referenceCode: string;
-  timestamp: string;
+  // Fix: Reference code can be camelCase (local) or snake_case (Supabase)
+  referenceCode?: string;
+  // Fix: Timestamp can be camelCase (local) or created_at (Supabase)
+  timestamp?: string;
+  // Fix: Added fields to support Supabase database responses
+  created_at?: string;
   emailFormatted?: string;
+  reference_code?: string;
+  email_formatted?: string;
 }
