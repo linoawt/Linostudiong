@@ -3,6 +3,30 @@ import React, { useState, useEffect } from 'react';
 import { Project } from '../types';
 import { supabase } from '../supabase';
 
+const MOCK_PROJECTS: Project[] = [
+  {
+    id: 'mock-1',
+    title: 'EcoBrand Identity',
+    category: 'Graphic Design',
+    thumbnail: 'https://images.unsplash.com/photo-1586717791821-3f44a563cc4c?auto=format&fit=crop&q=80&w=800',
+    description: 'A sustainable brand identity system for a renewable energy startup.'
+  },
+  {
+    id: 'mock-2',
+    title: 'Fintech Dashboard',
+    category: 'Web Development',
+    thumbnail: 'https://images.unsplash.com/photo-1551288049-bbbda546697c?auto=format&fit=crop&q=80&w=800',
+    description: 'A high-performance React dashboard for real-time financial tracking.'
+  },
+  {
+    id: 'mock-3',
+    title: 'Luxe Portfolio',
+    category: 'Web Development',
+    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800',
+    description: 'Minimalist interactive portfolio for a luxury architecture firm.'
+  }
+];
+
 const Portfolio: React.FC = () => {
   const [items, setItems] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,10 +41,18 @@ const Portfolio: React.FC = () => {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        setItems(data || []);
-      } catch (err) {
-        console.error("Error fetching projects:", err);
+        if (error) {
+          console.warn("Supabase Fetch Error (Projects):", error.message || error);
+          // Fallback to mock data if database table is missing or empty
+          setItems(MOCK_PROJECTS);
+        } else if (!data || data.length === 0) {
+          setItems(MOCK_PROJECTS);
+        } else {
+          setItems(data);
+        }
+      } catch (err: any) {
+        console.error("Critical error fetching projects:", err.message || err);
+        setItems(MOCK_PROJECTS);
       } finally {
         setIsLoading(false);
       }
@@ -68,12 +100,12 @@ const Portfolio: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {filteredProjects.map((project) => (
-              <div key={project.id} className="clay-card overflow-hidden group">
+              <div key={project.id} className="clay-card overflow-hidden group hover:-translate-y-1 transition-transform duration-500">
                 <div className="relative aspect-[4/3] overflow-hidden m-4 rounded-[1.5rem] shadow-inner">
                   <img 
                     src={project.thumbnail || "https://picsum.photos/800/600?grayscale"} 
                     alt={project.title} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
                   />
                   <div className="absolute inset-0 bg-indigo-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button className="clay-button-primary px-6 py-2 font-bold transform translate-y-4 group-hover:translate-y-0 transition-transform">

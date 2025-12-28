@@ -68,35 +68,31 @@ const App: React.FC = () => {
           .select('*')
           .single();
 
-        if (settingsError) throw settingsError;
+        if (settingsError) {
+          console.warn("Settings fetch failed (likely table missing), using defaults:", settingsError.message);
+        }
 
         // 2. Map DB snake_case to camelCase types
         const mappedConfig: SiteConfig = {
           ...INITIAL_STATE,
-          siteName: settings.site_name || INITIAL_STATE.siteName,
-          tagline: settings.tagline || INITIAL_STATE.tagline,
-          // Fixed: Changed hero_headline to heroHeadline and hero_subtext to heroSubtext to match SiteConfig type
-          heroHeadline: settings.hero_headline || INITIAL_STATE.heroHeadline,
-          heroSubtext: settings.hero_subtext || INITIAL_STATE.heroSubtext,
-          contactEmail: settings.contact_email || INITIAL_STATE.contactEmail,
-          contactPhone: settings.contact_phone || INITIAL_STATE.contactPhone,
-          location: settings.location || INITIAL_STATE.location,
-          theme: settings.theme || INITIAL_STATE.theme,
-          couponPrefix: settings.coupon_prefix || INITIAL_STATE.couponPrefix,
-          seo: settings.seo || INITIAL_STATE.seo,
-          skills: settings.skills || INITIAL_STATE.skills,
-          faqs: settings.faqs || INITIAL_STATE.faqs,
-          plans: settings.plans || INITIAL_STATE.plans
+          siteName: settings?.site_name || INITIAL_STATE.siteName,
+          tagline: settings?.tagline || INITIAL_STATE.tagline,
+          heroHeadline: settings?.hero_headline || INITIAL_STATE.heroHeadline,
+          heroSubtext: settings?.hero_subtext || INITIAL_STATE.heroSubtext,
+          contactEmail: settings?.contact_email || INITIAL_STATE.contactEmail,
+          contactPhone: settings?.contact_phone || INITIAL_STATE.contactPhone,
+          location: settings?.location || INITIAL_STATE.location,
+          theme: settings?.theme || INITIAL_STATE.theme,
+          couponPrefix: settings?.coupon_prefix || INITIAL_STATE.couponPrefix,
+          seo: settings?.seo || INITIAL_STATE.seo,
+          skills: settings?.skills || INITIAL_STATE.skills,
+          faqs: settings?.faqs || INITIAL_STATE.faqs,
+          plans: settings?.plans || INITIAL_STATE.plans
         };
-        
-        // 3. Fetch Services (Portfolio now handles its own)
-        const { data: servicesData } = await supabase.from('services').select('*').order('created_at', { ascending: true });
-        
-        if (servicesData) mappedConfig.services = servicesData;
 
         setConfig(mappedConfig);
-      } catch (err) {
-        console.warn("Supabase Fetch Error, using local defaults:", err);
+      } catch (err: any) {
+        console.warn("Supabase Fetch Error (Global), using local defaults:", err.message || err);
       } finally {
         setIsLoading(false);
       }
@@ -137,7 +133,7 @@ const App: React.FC = () => {
         <div className="blob bottom-40 right-10 opacity-10 bg-indigo-400"></div>
         
         <Hero config={config} onStartProject={() => setIsHireModalOpen(true)} />
-        <Services items={config.services.length > 0 ? config.services : []} />
+        <Services />
         <Portfolio />
         <Skills items={config.skills} />
         <div id="about"><Process /></div>
