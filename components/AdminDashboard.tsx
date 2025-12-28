@@ -306,6 +306,22 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose, config
                   </div>
                 </div>
                 
+                <div className="grid grid-cols-2 gap-10">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Contact Email</label>
+                    <input className="w-full clay-card-inset px-8 py-5 outline-none font-bold bg-white/50" value={localConfig.contactEmail} onChange={e => setLocalConfig({...localConfig, contactEmail: e.target.value})} />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Contact Phone</label>
+                    <input className="w-full clay-card-inset px-8 py-5 outline-none font-bold bg-white/50" value={localConfig.contactPhone} onChange={e => setLocalConfig({...localConfig, contactPhone: e.target.value})} />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Office Location</label>
+                  <input className="w-full clay-card-inset px-8 py-5 outline-none font-bold bg-white/50" value={localConfig.location} onChange={e => setLocalConfig({...localConfig, location: e.target.value})} />
+                </div>
+
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Hero Main Heading</label>
                   <input className="w-full clay-card-inset px-8 py-6 outline-none font-black text-2xl text-indigo-600 bg-white/50" value={localConfig.heroHeadline} onChange={e => setLocalConfig({...localConfig, heroHeadline: e.target.value})} />
@@ -317,11 +333,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose, config
                 </div>
                 
                 <div className="grid grid-cols-2 gap-10">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Contact Endpoint</label>
-                    <input className="w-full clay-card-inset px-8 py-5 outline-none font-bold bg-white/50" value={localConfig.contactEmail} onChange={e => setLocalConfig({...localConfig, contactEmail: e.target.value})} />
-                  </div>
-                  <div className="space-y-3">
+                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Ref Identity Prefix</label>
                     <input className="w-full clay-card-inset px-8 py-5 outline-none font-black text-indigo-600 uppercase tracking-widest bg-white/50" value={localConfig.couponPrefix} onChange={e => setLocalConfig({...localConfig, couponPrefix: e.target.value.toUpperCase()})} />
                   </div>

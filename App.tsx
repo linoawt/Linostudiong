@@ -43,7 +43,8 @@ const INITIAL_STATE: SiteConfig = {
   ],
   faqs: [
     { question: "What is your typical turnaround?", answer: "Usually 1-3 weeks depending on the complexity." },
-    { question: "Do you offer maintenance?", answer: "Yes, we have monthly support packages." }
+    { question: "Do you offer services globally?", answer: "Yes, we work with clients worldwide via remote collaboration tools." },
+    { question: "What technologies do you use?", answer: "We specialize in React, Node.js, and modern design tools like Figma." }
   ],
   plans: [
     { name: "Starter", price: "$499", features: ["Basic Website", "SEO Ready", "5 Pages"] },
@@ -62,37 +63,40 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Fetch Settings
+        // Fetch Settings from Supabase with a timeout or safety check
+        // The "Failed to fetch" usually happens here if the URL is dead
         const { data: settings, error: settingsError } = await supabase
           .from('settings')
           .select('*')
-          .single();
+          .limit(1)
+          .maybeSingle();
 
         if (settingsError) {
-          console.warn("Settings fetch failed (likely table missing), using defaults:", settingsError.message);
+          console.warn("Supabase returned an error, using local defaults:", settingsError.message);
         }
 
-        // 2. Map DB snake_case to camelCase types
-        const mappedConfig: SiteConfig = {
-          ...INITIAL_STATE,
-          siteName: settings?.site_name || INITIAL_STATE.siteName,
-          tagline: settings?.tagline || INITIAL_STATE.tagline,
-          heroHeadline: settings?.hero_headline || INITIAL_STATE.heroHeadline,
-          heroSubtext: settings?.hero_subtext || INITIAL_STATE.heroSubtext,
-          contactEmail: settings?.contact_email || INITIAL_STATE.contactEmail,
-          contactPhone: settings?.contact_phone || INITIAL_STATE.contactPhone,
-          location: settings?.location || INITIAL_STATE.location,
-          theme: settings?.theme || INITIAL_STATE.theme,
-          couponPrefix: settings?.coupon_prefix || INITIAL_STATE.couponPrefix,
-          seo: settings?.seo || INITIAL_STATE.seo,
-          skills: settings?.skills || INITIAL_STATE.skills,
-          faqs: settings?.faqs || INITIAL_STATE.faqs,
-          plans: settings?.plans || INITIAL_STATE.plans
-        };
-
-        setConfig(mappedConfig);
+        if (settings) {
+          const mappedConfig: SiteConfig = {
+            ...INITIAL_STATE,
+            siteName: settings.site_name || INITIAL_STATE.siteName,
+            tagline: settings.tagline || INITIAL_STATE.tagline,
+            heroHeadline: settings.hero_headline || INITIAL_STATE.heroHeadline,
+            heroSubtext: settings.hero_subtext || INITIAL_STATE.heroSubtext,
+            contactEmail: settings.contact_email || INITIAL_STATE.contactEmail,
+            contactPhone: settings.contact_phone || INITIAL_STATE.contactPhone,
+            location: settings.location || INITIAL_STATE.location,
+            theme: settings.theme || INITIAL_STATE.theme,
+            couponPrefix: settings.coupon_prefix || INITIAL_STATE.couponPrefix,
+            seo: settings.seo || INITIAL_STATE.seo,
+            skills: settings.skills || INITIAL_STATE.skills,
+            faqs: settings.faqs || INITIAL_STATE.faqs,
+            plans: settings.plans || INITIAL_STATE.plans
+          };
+          setConfig(mappedConfig);
+        }
       } catch (err: any) {
-        console.warn("Supabase Fetch Error (Global), using local defaults:", err.message || err);
+        // This catches the actual "Failed to fetch" network error
+        console.warn("Network error during Supabase fetch. Falling back to offline defaults.");
       } finally {
         setIsLoading(false);
       }
@@ -119,7 +123,10 @@ const App: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F0F4F8]">
-        <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-indigo-600 font-black text-xs uppercase tracking-widest animate-pulse">Initializing Studio...</p>
+        </div>
       </div>
     );
   }

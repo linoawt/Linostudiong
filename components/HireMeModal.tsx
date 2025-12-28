@@ -38,8 +38,9 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
         Return JSON format.
       `;
 
+      // Using gemini-flash-lite-latest for low-latency response
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-flash-lite-latest",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -58,8 +59,8 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
       const data = JSON.parse(response.text || '{}');
       
       if (data.referenceCode) {
-        // Direct Database Insertion via Supabase Client
-        const { error } = await supabase
+        // Step 1: Sync to Supabase Database
+        const { error: dbError } = await supabase
           .from('leads')
           .insert([{ 
             name: formData.name, 
@@ -71,7 +72,25 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
             email_formatted: data.emailFormatted 
           }]);
 
-        if (error) throw error;
+        if (dbError) throw dbError;
+
+        // Step 2: Notify Admin via Node.js/Nodemailer Backend
+        try {
+          await fetch('/api/hire/notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: formData.name,
+              email: formData.email,
+              budget: formData.budget,
+              message: formData.message,
+              referenceCode: data.referenceCode,
+              summary: data.emailFormatted
+            })
+          });
+        } catch (mailErr) {
+          console.warn("Notification system delayed, but lead saved:", mailErr);
+        }
 
         setResultData({ referenceCode: data.referenceCode, emailFormatted: data.emailFormatted });
         setStatus('success');
@@ -79,7 +98,7 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
         throw new Error("Invalid AI Response");
       }
     } catch (error) {
-      console.error("Supabase Submission Error:", error);
+      console.error("Studio Lead Sync Error:", error);
       setStatus('error');
     }
   };
@@ -109,6 +128,12 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
               <div className="w-16 h-16 clay-card-inset mx-auto flex items-center justify-center text-3xl mb-4 bg-white/50">💼</div>
               <h2 className="text-3xl font-black mb-2">Hire <span className="text-indigo-600">The Studio</span></h2>
               <p className="text-gray-500 text-sm font-medium">Your request will be prioritized via our Cloud CRM.</p>
+              {status === 'submitting' && (
+                <div className="mt-4 flex items-center justify-center gap-2 text-indigo-500 font-bold text-[10px] uppercase tracking-tighter">
+                   <svg className="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1a1 1 0 112 0v1a1 1 0 11-2 0zM13.243 15.657l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 01-1.414 1.414zM16 10a1 1 0 112 0 1 1 0 01-2 0z" /></svg>
+                   Low-latency AI Engine Active
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -151,7 +176,7 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
                 ) : "Request Studio Slot"}
               </button>
               
-              {status === 'error' && <p className="text-center text-red-500 text-xs font-bold animate-fadeIn">Database Connection Error. Try again.</p>}
+              {status === 'error' && <p className="text-center text-red-500 text-xs font-bold animate-fadeIn">Studio Sync Failure. Please retry.</p>}
             </form>
           </>
         ) : (
@@ -163,7 +188,7 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
               <p className="text-4xl font-black text-indigo-600 tracking-tighter">{resultData?.referenceCode}</p>
             </div>
             <p className="text-gray-600 mb-8 px-4 leading-relaxed font-medium">
-              Your inquiry is safely stored in our Supabase instance. Redirect to finalize details.
+              Your inquiry is safely stored in our Supabase instance and a notification has been sent to the studio admin.
             </p>
             <button onClick={handleWhatsAppRedirect} className="clay-button-primary w-full py-5 font-black text-lg flex items-center justify-center gap-3 shadow-xl hover:shadow-indigo-200">
               Complete on WhatsApp

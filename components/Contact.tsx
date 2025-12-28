@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { SiteConfig } from '../types';
+import { supabase } from '../supabase';
 
 interface ContactProps {
   config: SiteConfig;
@@ -8,21 +9,50 @@ interface ContactProps {
 
 const Contact: React.FC<ContactProps> = ({ config }) => {
   const [formData, setFormData] = useState({ name: '', email: '', subject: 'General Inquiry', message: '' });
-  const [isSent, setIsSent] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [referenceCode, setReferenceCode] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const lead = {
-      ...formData,
-      timestamp: new Date().toISOString(),
-      type: 'CONTACT_FORM',
-      referenceCode: `WEB-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
-    };
-    const existing = JSON.parse(localStorage.getItem('lino_leads') || '[]');
-    localStorage.setItem('lino_leads', JSON.stringify([...existing, lead]));
-    setIsSent(true);
-    setFormData({ name: '', email: '', subject: 'General Inquiry', message: '' });
-    setTimeout(() => setIsSent(false), 5000);
+    setStatus('submitting');
+
+    const generatedCode = `WEB-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    setReferenceCode(generatedCode);
+
+    try {
+      // Direct Database Insertion via Supabase Client
+      const { error } = await supabase
+        .from('leads')
+        .insert([{ 
+          name: formData.name, 
+          email: formData.email, 
+          type: 'CONTACT_FORM', 
+          message: formData.message, 
+          reference_code: generatedCode,
+          budget: 'N/A' // Default for general contact
+        }]);
+
+      if (error) throw error;
+
+      setStatus('success');
+      setFormData({ name: '', email: '', subject: 'General Inquiry', message: '' });
+      
+      // Automatic redirect after a short delay for better UX
+      setTimeout(() => {
+        handleWhatsAppRedirect(generatedCode);
+      }, 2000);
+      
+    } catch (err: any) {
+      console.error("Supabase Contact Error:", err);
+      setStatus('error');
+    }
+  };
+
+  const handleWhatsAppRedirect = (code: string) => {
+    const msg = `Hello Lino Studio! Ref: ${code}. I just sent an inquiry through your website. Message: ${formData.message || 'Following up on my contact form submission.'}`;
+    const cleanPhone = config.contactPhone.replace(/\D/g, '');
+    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
   };
 
   return (
@@ -41,16 +71,63 @@ const Contact: React.FC<ContactProps> = ({ config }) => {
               </div>
             </div>
             <div className="clay-card-inset p-8 md:p-12">
-              {isSent ? (
-                <div className="h-full flex flex-col items-center justify-center text-center animate-fadeIn"><div className="w-20 h-20 clay-card flex items-center justify-center text-4xl mb-6 text-green-500">✓</div><h3 className="text-2xl font-black mb-2">Message Saved!</h3><p className="text-gray-500">I've received your request in my studio dashboard.</p></div>
+              {status === 'success' ? (
+                <div className="h-full flex flex-col items-center justify-center text-center animate-fadeIn">
+                  <div className="w-24 h-24 clay-card flex items-center justify-center text-5xl mb-6 text-green-500 bg-white/50">✨</div>
+                  <h3 className="text-2xl font-black mb-2">Message Synced!</h3>
+                  <div className="clay-card-inset p-4 bg-white/40 mb-6 w-full">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Ref Token</p>
+                    <p className="text-2xl font-black text-indigo-600 tracking-tight">{referenceCode}</p>
+                  </div>
+                  <p className="text-gray-500 mb-8 text-sm">Redirecting you to WhatsApp to finalize details...</p>
+                  <button 
+                    onClick={() => handleWhatsAppRedirect(referenceCode)}
+                    className="clay-button-primary w-full py-4 font-black flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform"
+                  >
+                    Finish on WhatsApp
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                  </button>
+                  <button onClick={() => setStatus('idle')} className="mt-4 text-xs font-bold text-indigo-400 uppercase hover:text-indigo-600">Send another message</button>
+                </div>
               ) : (
                 <form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2"><label className="text-sm font-bold text-gray-700 ml-2">Name</label><input required type="text" className="w-full clay-card px-6 py-4 outline-none border-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
-                    <div className="space-y-2"><label className="text-sm font-bold text-gray-700 ml-2">Email</label><input required type="email" className="w-full clay-card px-6 py-4 outline-none border-none" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} /></div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-gray-700 ml-2">Name</label>
+                      <input required type="text" className="w-full clay-card px-6 py-4 outline-none border-none bg-white/50 focus:bg-white transition-colors" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} disabled={status === 'submitting'} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-gray-700 ml-2">Email</label>
+                      <input required type="email" className="w-full clay-card px-6 py-4 outline-none border-none bg-white/50 focus:bg-white transition-colors" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} disabled={status === 'submitting'} />
+                    </div>
                   </div>
-                  <div className="space-y-2"><label className="text-sm font-bold text-gray-700 ml-2">Message</label><textarea required rows={5} className="w-full clay-card px-6 py-4 outline-none resize-none border-none" value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}></textarea></div>
-                  <button type="submit" className="clay-button-primary w-full py-5 font-black text-lg transform hover:scale-[1.02] transition-transform">Send to Dashboard</button>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-2">Message</label>
+                    <textarea required rows={5} className="w-full clay-card px-6 py-4 outline-none resize-none border-none bg-white/50 focus:bg-white transition-colors" value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} disabled={status === 'submitting'}></textarea>
+                  </div>
+                  
+                  {status === 'error' && (
+                    <div className="p-4 clay-card-inset bg-red-50 text-red-500 text-xs font-bold rounded-2xl animate-fadeIn">
+                      Synchronization failed. Please check your connection and try again.
+                    </div>
+                  )}
+
+                  <button 
+                    type="submit" 
+                    disabled={status === 'submitting'}
+                    className={`clay-button-primary w-full py-5 font-black text-lg transform transition-all flex items-center justify-center gap-3 ${status === 'submitting' ? 'opacity-70 scale-95' : 'hover:scale-[1.02]'}`}
+                  >
+                    {status === 'submitting' ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Syncing to Cloud...
+                      </>
+                    ) : "Send to Dashboard"}
+                  </button>
+                  
+                  <p className="text-center text-[10px] font-black text-gray-400 uppercase tracking-widest mt-4">
+                    Inquiries are processed via Supabase & WhatsApp
+                  </p>
                 </form>
               )}
             </div>
