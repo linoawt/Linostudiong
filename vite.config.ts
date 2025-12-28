@@ -5,16 +5,20 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   define: {
-    // Shims process.env for the browser to support Gemini API's expected environment variable access
     'process.env': {
-      API_KEY: JSON.stringify(process.env.API_KEY)
+      API_KEY: JSON.stringify(process.env.API_KEY || '')
     }
-  },
-  server: {
-    port: 3000
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          utils: ['@supabase/supabase-js', '@google/genai']
+        }
+      }
+    }
   }
 });
