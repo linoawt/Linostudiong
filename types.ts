@@ -39,3 +39,39 @@ export interface FAQItem {
   question: string;
   answer: string;
 }
+
+export interface SEOConfig {
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string;
+}
+
+export interface SiteConfig {
+  siteName: string;
+  tagline: string;
+  heroHeadline: string;
+  heroSubtext: string;
+  contactEmail: string;
+  contactPhone: string;
+  location: string;
+  theme: 'light' | 'dark';
+  couponPrefix: string;
+  seo: SEOConfig;
+  projects: Project[];
+  services: Service[];
+  skills: Skill[];
+  faqs: FAQItem[];
+  plans: PricePlan[];
+}
+
+export interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  type: 'HIRE_ME' | 'CONTACT_FORM';
+  budget?: string;
+  message: string;
+  referenceCode: string;
+  timestamp: string;
+  emailFormatted?: string;
+}

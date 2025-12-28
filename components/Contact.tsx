@@ -1,89 +1,58 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { SiteConfig } from '../types';
 
-const Contact: React.FC = () => {
+interface ContactProps {
+  config: SiteConfig;
+}
+
+const Contact: React.FC<ContactProps> = ({ config }) => {
+  const [formData, setFormData] = useState({ name: '', email: '', subject: 'General Inquiry', message: '' });
+  const [isSent, setIsSent] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const lead = {
+      ...formData,
+      timestamp: new Date().toISOString(),
+      type: 'CONTACT_FORM',
+      referenceCode: `WEB-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
+    };
+    const existing = JSON.parse(localStorage.getItem('lino_leads') || '[]');
+    localStorage.setItem('lino_leads', JSON.stringify([...existing, lead]));
+    setIsSent(true);
+    setFormData({ name: '', email: '', subject: 'General Inquiry', message: '' });
+    setTimeout(() => setIsSent(false), 5000);
+  };
+
   return (
     <section id="contact" className="py-24 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="clay-card p-10 md:p-20 overflow-hidden relative">
-          {/* Background decoration */}
           <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl"></div>
-          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 relative z-10">
             <div>
-              <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight">
-                Let’s Build Something <span className="text-indigo-600">Great</span>
-              </h2>
-              <p className="text-lg text-gray-600 mb-12 max-w-md">
-                Ready to bring your idea to life? Whether it's a new brand identity or a complex web app, I'm here to help.
-              </p>
-
+              <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight">Let’s Build Something <span className="text-indigo-600">Great</span></h2>
+              <p className="text-lg text-gray-600 mb-12 max-w-md">Ready to bring your idea to life? Our studio is currently accepting new projects.</p>
               <div className="space-y-8">
-                <div className="flex items-center gap-6">
-                  <div className="w-14 h-14 clay-card-inset flex items-center justify-center text-2xl">📍</div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">Location</h4>
-                    <p className="text-gray-600">Yenagoa, Bayelsa State, Nigeria</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6">
-                  <div className="w-14 h-14 clay-card-inset flex items-center justify-center text-2xl">📧</div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">Email</h4>
-                    <p className="text-gray-600 underline">linostudiong@gmail.com</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6">
-                  <div className="w-14 h-14 clay-card-inset flex items-center justify-center text-2xl">📞</div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">Phone</h4>
-                    <p className="text-gray-600">+234 XXX XXX XXXX</p>
-                  </div>
-                </div>
+                <div className="flex items-center gap-6"><div className="w-14 h-14 clay-card-inset flex items-center justify-center text-2xl">📍</div><div><h4 className="font-bold text-gray-900">Location</h4><p className="text-gray-600">{config.location}</p></div></div>
+                <div className="flex items-center gap-6"><div className="w-14 h-14 clay-card-inset flex items-center justify-center text-2xl">📧</div><div><h4 className="font-bold text-gray-900">Email</h4><p className="text-gray-600 underline">{config.contactEmail}</p></div></div>
+                <div className="flex items-center gap-6"><div className="w-14 h-14 clay-card-inset flex items-center justify-center text-2xl">📞</div><div><h4 className="font-bold text-gray-900">Phone</h4><p className="text-gray-600">{config.contactPhone}</p></div></div>
               </div>
             </div>
-
             <div className="clay-card-inset p-8 md:p-12">
-              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700 ml-2">Your Name</label>
-                    <input 
-                      type="text" 
-                      placeholder="John Doe"
-                      className="w-full clay-card px-6 py-4 outline-none focus:ring-2 focus:ring-indigo-500 transition-all" 
-                    />
+              {isSent ? (
+                <div className="h-full flex flex-col items-center justify-center text-center animate-fadeIn"><div className="w-20 h-20 clay-card flex items-center justify-center text-4xl mb-6 text-green-500">✓</div><h3 className="text-2xl font-black mb-2">Message Saved!</h3><p className="text-gray-500">I've received your request in my studio dashboard.</p></div>
+              ) : (
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2"><label className="text-sm font-bold text-gray-700 ml-2">Name</label><input required type="text" className="w-full clay-card px-6 py-4 outline-none border-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
+                    <div className="space-y-2"><label className="text-sm font-bold text-gray-700 ml-2">Email</label><input required type="email" className="w-full clay-card px-6 py-4 outline-none border-none" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} /></div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700 ml-2">Email Address</label>
-                    <input 
-                      type="email" 
-                      placeholder="john@example.com"
-                      className="w-full clay-card px-6 py-4 outline-none focus:ring-2 focus:ring-indigo-500 transition-all" 
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 ml-2">Subject</label>
-                  <select className="w-full clay-card px-6 py-4 outline-none focus:ring-2 focus:ring-indigo-500 appearance-none bg-no-repeat bg-right transition-all">
-                    <option>General Inquiry</option>
-                    <option>Web Development Project</option>
-                    <option>Graphic Design Work</option>
-                    <option>Brand Consultation</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 ml-2">Your Message</label>
-                  <textarea 
-                    rows={5} 
-                    placeholder="Tell me about your project..."
-                    className="w-full clay-card px-6 py-4 outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none"
-                  ></textarea>
-                </div>
-                <button className="clay-button-primary w-full py-5 font-black text-lg transform hover:scale-[1.02] transition-transform">
-                  Send a Message
-                </button>
-              </form>
+                  <div className="space-y-2"><label className="text-sm font-bold text-gray-700 ml-2">Message</label><textarea required rows={5} className="w-full clay-card px-6 py-4 outline-none resize-none border-none" value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}></textarea></div>
+                  <button type="submit" className="clay-button-primary w-full py-5 font-black text-lg transform hover:scale-[1.02] transition-transform">Send to Dashboard</button>
+                </form>
+              )}
             </div>
           </div>
         </div>
