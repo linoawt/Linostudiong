@@ -11,9 +11,11 @@ import Pricing from './components/Pricing';
 import Contact from './components/Contact';
 import FAQ from './components/FAQ';
 import Footer from './components/Footer';
+import HireMeModal from './components/HireMeModal';
 
 const App: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHireModalOpen, setIsHireModalOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +25,8 @@ const App: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const toggleModal = () => setIsHireModalOpen(!isHireModalOpen);
+
   return (
     <div className="relative overflow-x-hidden min-h-screen">
       {/* Background Blobs */}
@@ -30,10 +34,10 @@ const App: React.FC = () => {
       <div className="blob bottom-[-100px] right-[-100px] bg-blue-400 opacity-10 animate-bounce" style={{ animationDuration: '8s' }}></div>
       <div className="blob top-[50%] right-[10%] bg-indigo-500 opacity-5"></div>
 
-      <Header isScrolled={isScrolled} />
+      <Header isScrolled={isScrolled} onHireMeClick={toggleModal} />
       
       <main>
-        <Hero />
+        <Hero onStartProject={toggleModal} />
         <Services />
         <Portfolio />
         <Skills />
@@ -45,6 +49,11 @@ const App: React.FC = () => {
       </main>
 
       <Footer />
+
+      <HireMeModal 
+        isOpen={isHireModalOpen} 
+        onClose={() => setIsHireModalOpen(false)} 
+      />
     </div>
   );
 };

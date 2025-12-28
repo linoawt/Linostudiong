@@ -1,7 +1,11 @@
 
 import React from 'react';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  onStartProject: () => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onStartProject }) => {
   return (
     <section id="home" className="pt-32 pb-20 px-6 min-h-screen flex items-center justify-center relative overflow-hidden">
       <div className="max-w-5xl mx-auto text-center z-10">
@@ -22,9 +26,12 @@ const Hero: React.FC = () => {
           <a href="#portfolio" className="clay-button-primary px-10 py-5 text-lg font-bold w-full sm:w-auto transform hover:scale-105 transition-transform">
             View My Work
           </a>
-          <a href="#contact" className="clay-button px-10 py-5 text-lg font-bold w-full sm:w-auto hover:text-indigo-600">
+          <button 
+            onClick={onStartProject}
+            className="clay-button px-10 py-5 text-lg font-bold w-full sm:w-auto hover:text-indigo-600 transition-all"
+          >
             Start a Project
-          </a>
+          </button>
         </div>
 
         {/* Floating Mockup Illustration Area */}

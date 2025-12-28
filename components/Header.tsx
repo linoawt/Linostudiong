@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 
 interface HeaderProps {
   isScrolled: boolean;
+  onHireMeClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
+const Header: React.FC<HeaderProps> = ({ isScrolled, onHireMeClick }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const menuItems = [
@@ -16,6 +17,11 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
     { name: 'About', href: '#about' },
     { name: 'Contact', href: '#contact' },
   ];
+
+  const handleHireClick = () => {
+    setMobileMenuOpen(false);
+    onHireMeClick();
+  };
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 pt-4`}>
@@ -40,12 +46,12 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
         </ul>
 
         <div className="hidden md:block">
-          <a 
-            href="#contact" 
+          <button 
+            onClick={onHireMeClick}
             className="clay-button-primary px-6 py-2.5 font-bold inline-block"
           >
             Hire Me
-          </a>
+          </button>
         </div>
 
         {/* Mobile Toggle */}
@@ -72,13 +78,12 @@ const Header: React.FC<HeaderProps> = ({ isScrolled }) => {
               {item.name}
             </a>
           ))}
-          <a 
-            href="#contact" 
+          <button 
+            onClick={handleHireClick}
             className="clay-button-primary px-8 py-3 w-full text-center font-bold"
-            onClick={() => setMobileMenuOpen(false)}
           >
             Hire Me
-          </a>
+          </button>
         </div>
       )}
     </header>
