@@ -1,39 +1,35 @@
 
 # 🌐 Lino Studio NG — Studio Infrastructure
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-4F46E5?style=for-the-badge)](https://linoawt.github.io/Linostudiong/)
-[![Deployment](https://img.shields.io/badge/Status-Live_on_GitHub_Pages-3ECF8E?style=for-the-badge)](https://linoawt.github.io/Linostudiong/)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-4F46E5?style=for-the-badge)](https://linostudiong.vercel.app)
+[![Deployment](https://img.shields.io/badge/Status-Live_on_Vercel-3ECF8E?style=for-the-badge)](https://linostudiong.vercel.app)
 
 > **Designing Visual Identity. Building Digital Experiences.**
 
-Lino Studio NG is a premium, claymorphic portfolio built for high conversion. This repository is configured for automated deployment to **GitHub Pages**.
+Lino Studio NG is a premium, claymorphic portfolio built for high conversion. This repository is optimized for deployment on **Vercel**.
 
 ---
 
-## 🚀 Quick Deployment Guide
+## 🚀 Deployment Guide (Vercel)
 
-Since you have installed the `gh-pages` package, follow these steps to sync your project to the web:
+To host your studio at `linostudiong.vercel.app`:
 
-1.  **Configure URL**: Your `package.json` is already set to `https://linoawt.github.io/Linostudiong/`.
-2.  **Sync & Deploy**: Run the following command in your terminal:
-    ```bash
-    npm run deploy
-    ```
-3.  **Finalize**: Go to your GitHub Repository **Settings** > **Pages** and ensure the branch is set to `gh-pages`.
+1.  **Push to GitHub**:
+    Ensure all files (`index.html`, `index.tsx`, etc.) are in the root directory and pushed to your `main` branch.
+2.  **Vercel Configuration**:
+    - Log in to [Vercel](https://vercel.com).
+    - Import your GitHub repository `Linostudiong`.
+    - Vercel will automatically detect the static project.
+    - Ensure your environment variables (like `API_KEY` for Gemini) are set in the Vercel Dashboard if required.
+3.  **Final Step**: Vercel will build and deploy your site. It will be live at: [https://linostudiong.vercel.app](https://linostudiong.vercel.app).
 
 ---
 
 ## 🛠️ Hybrid Architecture
 
-- **Frontend (Static)**: Hosted on **GitHub Pages**. Handles the UI, Portfolio, and Gemini AI interactions.
-- **Database (Cloud)**: **Supabase** handles real-time leads and site configuration.
-- **Notifications (API)**: The `server.js` file is a Node.js notification engine. **Note:** GitHub Pages does not support Node.js execution. To keep the email notification system alive, host `server.js` on a platform like Render, Railway, or Vercel and update the fetch URL in `Contact.tsx`.
-
----
-
-## ☁️ Database Sync (Supabase)
-
-Initialize your studio environment by running the SQL provided in the project root within your Supabase SQL Editor. This ensures your leads and projects are synced to the cloud.
+- **Frontend**: Hosted on **Vercel**. Handles the UI, Portfolio, and Gemini AI.
+- **Database**: **Supabase** handles real-time leads and site configuration.
+- **Notifications**: Form submissions fallback to WhatsApp/Supabase automatically. To enable email notifications via `server.js`, you may need to convert the server logic into Vercel Serverless Functions in the `/api` directory.
 
 ---
 

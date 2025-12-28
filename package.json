@@ -1,23 +1,24 @@
 
 {
   "name": "lino-studio-ng",
-  "version": "1.0.0",
-  "description": "Lino Studio NG - Creative Portfolio",
+  "version": "1.0.2",
+  "description": "Premium Claymorphic Studio Portfolio",
   "main": "index.tsx",
-  "homepage": "https://linoawt.github.io/Linostudiong/",
+  "homepage": "https://linostudiong.vercel.app",
   "scripts": {
     "start": "npx serve .",
-    "predeploy": "echo 'Syncing files for deployment...'",
-    "deploy": "gh-pages -d . -i .gitignore -m 'Deploy Lino Studio to GitHub Pages'"
+    "deploy": "echo 'Vercel handles deployment automatically on push to main branch.'"
   },
   "dependencies": {
     "gh-pages": "^6.3.0"
   },
   "keywords": [
+    "lino studio ng",
     "portfolio",
     "claymorphism",
-    "design",
-    "development"
+    "nigeria",
+    "web development",
+    "graphic design"
   ],
   "author": "Lino Studio NG",
   "license": "MIT"

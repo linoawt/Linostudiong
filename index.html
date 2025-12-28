@@ -6,20 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lino Studio NG | Design & Code</title>
     
+    <!-- Base Path for Vercel Deployment (Root) -->
+    <base href="/">
+    
     <!-- Primary Meta Tags -->
     <meta name="title" content="Lino Studio NG | Design & Code">
     <meta name="description" content="Professional graphic design and web development studio. Designing Visual Identity, Building Digital Experiences.">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://linoawt.github.io/Linostudiong/">
+    <meta property="og:url" content="https://linostudiong.vercel.app/">
     <meta property="og:title" content="Lino Studio NG | Design & Code">
     <meta property="og:description" content="High-end claymorphic portfolio focused on brand growth and performance development.">
     <meta property="og:image" content="https://images.unsplash.com/photo-1551288049-bbbda546697c?auto=format&fit=crop&q=80&w=1200">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://linoawt.github.io/Linostudiong/">
+    <meta property="twitter:url" content="https://linostudiong.vercel.app/">
     <meta property="twitter:title" content="Lino Studio NG | Design & Code">
     <meta property="twitter:description" content="Professional graphic design and web development studio.">
 
@@ -34,7 +37,7 @@
             overflow-x: hidden;
         }
         
-        /* Light Theme (Default) */
+        /* Claymorphism UI Framework */
         .clay-card {
             background: #F0F4F8;
             border-radius: 2.5rem;
@@ -53,7 +56,6 @@
             transition: all 0.2s ease;
         }
 
-        /* Dark Mode Theme overrides */
         .dark-mode {
             background-color: #1a1a2e;
             color: #e0e0e0;
@@ -71,13 +73,6 @@
             box-shadow: 6px 6px 12px #0d0d1a, -6px -6px 12px #272742;
             color: #e0e0e0;
         }
-        .dark-mode .clay-nav {
-            background: rgba(26, 26, 46, 0.8);
-        }
-        .dark-mode .text-gray-900 { color: #ffffff !important; }
-        .dark-mode .text-gray-600 { color: #a0aec0 !important; }
-        .dark-mode .text-gray-700 { color: #cbd5e0 !important; }
-        .dark-mode .bg-white { background-color: #16213e !important; }
 
         .clay-button-primary {
             background: #4F46E5;
