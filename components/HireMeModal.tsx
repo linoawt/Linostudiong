@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { SiteConfig } from '../types';
-import { supabase } from '../supabase';
+import { SiteConfig } from '../types.ts';
+import { supabase } from '../supabase.ts';
 
 interface HireMeModalProps {
   isOpen: boolean;
@@ -21,8 +21,15 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
     e.preventDefault();
     setStatus('submitting');
 
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      console.error("Gemini API key is not configured.");
+      setStatus('error');
+      return;
+    }
+
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey });
       const prompt = `
         You are an automated lead assistant for ${config.siteName}. 
         Process this inquiry:
@@ -38,7 +45,6 @@ const HireMeModal: React.FC<HireMeModalProps> = ({ isOpen, onClose, config }) =>
         Return JSON format.
       `;
 
-      // Optimized for quality and speed with gemini-3-flash-preview
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: prompt,

@@ -1,19 +1,20 @@
+
 import React, { useState, useEffect } from 'react';
-import Header from './components/Header';
-import Hero from './components/Hero';
-import Services from './components/Services';
-import Portfolio from './components/Portfolio';
-import Skills from './components/Skills';
-import Process from './components/Process';
-import Testimonials from './components/Testimonials';
-import Pricing from './components/Pricing';
-import Contact from './components/Contact';
-import FAQ from './components/FAQ';
-import Footer from './components/Footer';
-import HireMeModal from './components/HireMeModal';
-import AdminDashboard from './components/AdminDashboard';
-import { SiteConfig } from './types';
-import { supabase } from './supabase';
+import Header from './components/Header.tsx';
+import Hero from './components/Hero.tsx';
+import Services from './components/Services.tsx';
+import Portfolio from './components/Portfolio.tsx';
+import Skills from './components/Skills.tsx';
+import Process from './components/Process.tsx';
+import Testimonials from './components/Testimonials.tsx';
+import Pricing from './components/Pricing.tsx';
+import Contact from './components/Contact.tsx';
+import FAQ from './components/FAQ.tsx';
+import Footer from './components/Footer.tsx';
+import HireMeModal from './components/HireMeModal.tsx';
+import AdminDashboard from './components/AdminDashboard.tsx';
+import { SiteConfig } from './types.ts';
+import { supabase } from './supabase.ts';
 
 const INITIAL_STATE: SiteConfig = {
   siteName: "Lino Studio NG",

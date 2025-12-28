@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { SiteConfig, Lead, Project, Service } from '../types';
-import { supabase } from '../supabase';
+import { SiteConfig, Lead, Project, Service } from '../types.ts';
+import { supabase } from '../supabase.ts';
 
 interface AdminDashboardProps {
   isOpen: boolean;
