@@ -30,37 +30,44 @@ const INITIAL_STATE: SiteConfig = {
     metaDescription: "Professional graphic design and web development studio based in Nigeria.",
     keywords: "design, development, nigeria, branding, web app"
   },
-  projects: [
-    { id: '1', title: 'NeoBank App', category: 'Web Development', thumbnail: 'https://picsum.photos/600/400?random=1', description: 'Financial tech platform.' },
-    { id: '2', title: 'Urban Bloom Branding', category: 'Graphic Design', thumbnail: 'https://picsum.photos/600/400?random=2', description: 'Visual identity for floral boutique.' }
-  ],
-  services: [
-    { id: '1', title: 'Graphic Design', icon: '🖌', description: 'Visual stories for your brand.', items: ['Flyers', 'Logos', 'Branding'] },
-    { id: '2', title: 'Web Development', icon: '💻', description: 'Scalable web applications.', items: ['React', 'Node.js', 'PHP'] }
-  ],
-  skills: [
-    { name: 'Branding', level: 90, category: 'Design' },
-    { name: 'JavaScript', level: 85, category: 'Development' }
-  ],
-  faqs: [
-    { question: "What services do you offer?", answer: "We provide graphic design and full-stack web development." }
-  ],
-  plans: [
-    { name: "Professional", price: "$799", features: ["Full Branding", "Web Design"], highlighted: true }
-  ]
+  projects: [],
+  services: [],
+  skills: [],
+  faqs: [],
+  plans: []
 };
 
 const App: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHireModalOpen, setIsHireModalOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
-  const [config, setConfig] = useState<SiteConfig>(() => {
-    const saved = localStorage.getItem('lino_studio_db');
-    return saved ? JSON.parse(saved) : INITIAL_STATE;
-  });
+  const [config, setConfig] = useState<SiteConfig>(INITIAL_STATE);
+  const [isBackendConnected, setIsBackendConnected] = useState(false);
+
+  // Sync with real Node.js Backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/config');
+        if (response.ok) {
+          const data = await response.json();
+          setConfig(prev => ({ ...prev, ...data }));
+          setIsBackendConnected(true);
+        } else {
+          // Fallback to local storage if server is down during development
+          const saved = localStorage.getItem('lino_studio_db');
+          if (saved) setConfig(JSON.parse(saved));
+        }
+      } catch (err) {
+        console.warn("Backend not detected, running in standalone mode.");
+        const saved = localStorage.getItem('lino_studio_db');
+        if (saved) setConfig(JSON.parse(saved));
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('lino_studio_db', JSON.stringify(config));
     document.title = config.seo.metaTitle;
     if (config.theme === 'dark') document.documentElement.classList.add('dark-mode');
     else document.documentElement.classList.remove('dark-mode');
@@ -72,26 +79,48 @@ const App: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleUpdateConfig = async (newConfig: SiteConfig) => {
+    setConfig(newConfig);
+    // Persist to Backend
+    try {
+      await fetch('/api/config/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newConfig)
+      });
+    } catch (err) {
+      localStorage.setItem('lino_studio_db', JSON.stringify(newConfig));
+    }
+  };
+
   return (
     <div className={`transition-colors duration-500 ${config.theme === 'dark' ? 'bg-[#1a1a2e] text-white' : 'bg-[#F0F4F8] text-gray-900'}`}>
+      {/* Backend Connectivity Status (Admin only or Debug) */}
+      {!isBackendConnected && (
+        <div className="fixed bottom-4 left-4 z-[200] px-3 py-1 bg-yellow-400 text-black text-[10px] font-black rounded-full shadow-lg flex items-center gap-2">
+          <div className="w-2 h-2 bg-yellow-600 rounded-full animate-pulse"></div>
+          STANDALONE MODE (NO DB)
+        </div>
+      )}
+
       <Header isScrolled={isScrolled} config={config} onHireMeClick={() => setIsHireModalOpen(true)} />
       
       <main>
         <Hero config={config} onStartProject={() => setIsHireModalOpen(true)} />
-        <Services items={config.services} />
-        <Portfolio items={config.projects} />
-        <Skills items={config.skills} />
+        <Services items={config.services.length > 0 ? config.services : INITIAL_STATE.services} />
+        <Portfolio items={config.projects.length > 0 ? config.projects : INITIAL_STATE.projects} />
+        <Skills items={config.skills.length > 0 ? config.skills : INITIAL_STATE.skills} />
         <div id="about"><Process /></div>
         <Testimonials />
-        <Pricing plans={config.plans} />
-        <FAQ items={config.faqs} />
+        <Pricing plans={config.plans.length > 0 ? config.plans : INITIAL_STATE.plans} />
+        <FAQ items={config.faqs.length > 0 ? config.faqs : INITIAL_STATE.faqs} />
         <Contact config={config} />
       </main>
 
       <Footer config={config} onAdminClick={() => setIsAdminOpen(true)} />
 
       <HireMeModal isOpen={isHireModalOpen} onClose={() => setIsHireModalOpen(false)} config={config} />
-      <AdminDashboard isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} config={config} onUpdateConfig={setConfig} />
+      <AdminDashboard isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} config={config} onUpdateConfig={handleUpdateConfig} />
     </div>
   );
 };
